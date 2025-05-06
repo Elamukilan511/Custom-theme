@@ -26,9 +26,11 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 app_include_css = ["/assets/custom_app/css/theme.css",
-                   "/assets/custom_app/css/sidebar.css",]
+                #    "/assets/custom_app/css/sidebar.css",
+                   ]
 
-app_include_js = ["/assets/custom_app/js/page.js",
+app_include_js = [
+                    # "/assets/custom_app/js/page.js",
                   "/assets/custom_app/js/theme.js",]
 
 # include js, css files in header of web template
@@ -51,6 +53,16 @@ app_include_js = ["/assets/custom_app/js/page.js",
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+signup_form_template = "custom_app/templates/ms_signup.html"
+
+website_route_rules = [
+    {"from_route": "/test/<path:doctype>", "to_route": "test"},
+    {"from_route": "/f/<path:doctype>", "to_route": "f"},
+    {"from_route": "/Form/<path:doctype>", "to_route": "Form"},
+    {"from_route": "/FORMS/<path:doctype>", "to_route": "FORMS"},
+    {"from_route": "/forms/<path:doctype>", "to_route": "forms"},
+    {"from_route": "/login", "to_route": "login"}
+]
 
 extend_bootinfo = [
 	"custom_app.boot.custom_get_workspace_sidebar_items",

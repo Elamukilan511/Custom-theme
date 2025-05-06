@@ -1,0 +1,186 @@
+{% extends "templates/web.html" %}
+{% block title %}
+{{ _("WEB PORTAL") }}
+{% endblock %}
+{% block page_content %}
+<style>
+  	/* Reset */
+body, h1, h2, ul, li, a, button {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  display: flex;
+  height: 100vh;
+  margin: 0;
+}
+
+/* Container Layout */
+.custom-container {
+  display: flex;
+  width: 100%;
+}
+
+/* Sidebar */
+.custom-sidebar {
+  width: 250px;
+  background-color: #2c3552;
+  color: white;
+  height: 100%;
+  padding: 20px;
+}
+
+.custom-menu ul {
+  list-style: none;
+}
+
+.custom-menu li {
+  margin-bottom: 15px;
+}
+
+.custom-menu a {
+  text-decoration: none;
+  color: white;
+  font-size: 14px;
+  display: block;
+  padding: 8px 10px;
+  border-radius: 5px;
+}
+
+.custom-menu a.custom-active {
+  background-color: #47567e;
+}
+
+.custom-pro-badge {
+  background-color: #ff4757;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 5px;
+}
+
+/* Main Content */
+.custom-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.custom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.custom-header h1 {
+  font-size: 18px;
+  color: #333;
+}
+
+.custom-filters button {
+  background-color: #e0e4e8;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.custom-filters button:hover {
+  background-color: #d0d4d9;
+}
+
+/* Paths Section */
+.custom-paths h2 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.custom-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.custom-path-card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.custom-path-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  border-color: #bbb;
+}
+
+</style>
+  <div class="custom-container">
+    <!-- Sidebar -->
+    <aside class="custom-sidebar">
+      <nav class="custom-menu">
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">Quick Links</a></li>
+          <li><a href="#" class="custom-active">Sanger Sequencing</a></li>
+          <li><a href="#">Gene Synthesis</a></li>
+          <li><a href="#">Oligo Synthesis</a></li>
+          <li><a href="#">Plasmid DNA Preparation</a></li>
+          <li><a href="#">Cloning and Mutagenesis</a></li>
+          <li><a href="#">GLP-Compliant Services</a></li>
+          <li><a href="#">Molecular Genetics (PCR+Sanger)</a></li>
+          <li><a href="#">Clinical Services</a></li>
+          <li><a href="#">Cell and Gene Therapy Services</a></li>
+          <li><a href="#">Gene and Genome Editing Services</a></li>
+          <li><a href="#">Biofluid Processing</a></li>
+          <li><a href="#">Sample Sourcing Service</a></li>
+          <li><a href="#">Genomics Prepayments</a></li>
+          <li><a href="#">Proteomics</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="custom-content">
+      <header class="custom-header">
+        <h1>Displaying 4 out of 10 Paths</h1>
+      </header>
+
+      <section class="custom-paths">
+        <!-- Development Paths -->
+        <h2>Development Paths</h2>
+        <div class="custom-grid">
+          <div class="custom-path-card">Targeted PCR and Sanger Sequencing</div>
+          <div class="custom-path-card">Standard RNA-Seq</div>
+          <div class="custom-path-card">16S rRNA Gene Sequencing</div>
+          <div class="custom-path-card">PCR-Based mutagenesis</div>
+          <div class="custom-path-card">PriorityGENE</div>
+          <div class="custom-path-card">Oligo Retain for Sanger</div>
+        </div>
+
+        <!-- Design Paths -->
+        <h2>Design Paths</h2>
+        <div class="custom-grid">
+          <div class="custom-path-card">Targeted PCR and Sanger Sequencing</div>
+          <div class="custom-path-card">Standard RNA-Seq</div>
+          <div class="custom-path-card">16S rRNA Gene Sequencing</div>
+          <div class="custom-path-card">PCR-Based mutagenesis</div>
+          <div class="custom-path-card">PriorityGENE</div>
+          <div class="custom-path-card">Oligo Retain for Sanger</div>
+        </div>
+      </section>
+    </main>
+  </div>
+  {% endblock %}

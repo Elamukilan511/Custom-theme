@@ -1,0 +1,1187 @@
+{% extends "templates/web.html" %}
+
+{% block title %}
+{{ _("WEB PORTAL") }}
+{% endblock %}
+
+{% block page_content %}
+<br><br><br><br>
+<div class="formbold-main-wrapper">
+   <div class="formbold-form-wrapper">
+<div class="card">
+<div class="wizard-progress">
+    {% set tab_fields = fields | selectattr("fieldtype", "equalto", "Tab Break") | list %}
+    {% for tab in tab_fields %}
+        <div class="step {% if loop.first %}current{% endif %}">
+            <div class="node"></div>
+            <span>{{ tab.label or "Step " ~ loop.index }}</span> <!-- Use label if available -->
+        </div>
+    {% endfor %}
+</div>
+</div>
+
+      <br>
+      <br>
+      <br>
+      <br>
+
+<form method="POST">
+    {% for field in fields %}
+        {% if field.fieldtype == "Tab Break" %}
+            {% if loop.index != 1 %}</div>{% endif %}
+            <div class="formbold-section {% if loop.first %}active{% endif %}" id="{{ field.fieldname }}">
+        {% endif %}
+
+        {% if field.fieldtype == "Section Break" %}
+            <!-- Section Break Fix: Moved outside form field div -->
+            <div class="formbold-section-break">
+                <h5>{{ field.label }}</h5>
+                {% if field.description %}<p>{{ field.description }}</p>{% endif %}
+            </div>
+        {% else %}
+            <div class="formbold-mb-6">
+                <label class="formbold-form-label">
+                    {% if field.label %}{{ field.label }}{% endif %}
+                    {% if field.reqd %}<span style="color: red;">*</span>{% endif %}
+                </label>
+
+                {% if field.fieldtype in ["Data", "Link"] %}
+                    <input type="text" class="formbold-form-input" name="{{ field.fieldname }}" 
+                        {% if field.reqd %}required{% endif %} 
+                        {% if field.read_only %}readonly{% endif %}/>
+                {% elif field.fieldtype == "Date" %}
+                    <input type="date" class="formbold-form-input" name="{{ field.fieldname }}" 
+                        {% if field.reqd %}required{% endif %} 
+                        {% if field.read_only %}readonly{% endif %}/>
+                {% elif field.fieldtype == "Phone" %}
+                    <input type="tel" class="formbold-form-input" name="{{ field.fieldname }}" 
+                        {% if field.reqd %}required{% endif %} 
+                        {% if field.read_only %}readonly{% endif %}/>
+
+                {% elif field.fieldtype == "Time" %}
+                    <input type="time" class="formbold-form-input" name="{{ field.fieldname }}" 
+                        {% if field.reqd %}required{% endif %} 
+                        {% if field.read_only %}readonly{% endif %}/>
+                {% elif field.fieldtype == "Datetime" %}
+                    <input type="datetime-local" class="formbold-form-input" name="{{ field.fieldname }}" 
+                        {% if field.reqd %}required{% endif %} 
+                        {% if field.read_only %}readonly{% endif %}/>
+                {% elif field.fieldtype in ["Int", "Currency"] %}
+                    <input type="number" class="formbold-form-input" name="{{ field.fieldname }}" 
+                        {% if field.reqd %}required{% endif %} 
+                        {% if field.read_only %}readonly{% endif %}/>
+                {% elif field.fieldtype in ["Small Text", "Text"] %}
+                    <textarea name="{{ field.fieldname }}" class="formbold-form-input"
+                        {% if field.reqd %}required{% endif %} 
+                        {% if field.read_only %}readonly{% endif %}></textarea>
+                {% elif field.fieldtype == "Select" and field.options %}
+                    <select class="formbold-form-input" name="{{ field.fieldname }}"
+                        {% if field.reqd %}required{% endif %} 
+                        {% if field.read_only %}disabled{% endif %}>
+                        {% for option in field.options.split("\n") %}
+                            <option value="{{ option }}">{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+
+                {% if field.fieldtype == "Attach" %}
+                    <div class="upload-area" ondrop="handleDrop(event, '{{ field.fieldname }}-file-list')" ondragover="event.preventDefault()">
+                        <div class="drop-text">Drag & Drop to Upload File</div>
+                        <div class="or-text">OR</div>
+                        <button type="button" class="browse-btn" onclick="document.getElementById('{{ field.fieldname }}-file').click()">Browse File</button>
+                        <input type="file" class="file-input" id="{{ field.fieldname }}-file" name="{{ field.fieldname }}" hidden onchange="addFiles(event, '{{ field.fieldname }}-file-list')" multiple accept=".pdf,.jpg,.png"/>
+                        <div class="file-list" id="{{ field.fieldname }}-file-list"></div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if loop.last %}</div>{% endif %}  <!-- Close the last tab -->
+    {% endfor %}
+
+    <!-- Navigation Buttons at the Bottom of Each Tab -->
+    {% for field in fields if field.fieldtype == "Tab Break" %}
+        <div class="form-navigation {% if loop.first %}first-tab{% endif %}" id="nav-{{ field.fieldname | replace(' ', '_') }}">
+            {% if not loop.first %}
+                <button type="button" class="prev-btn" onclick="changeTab(-1)">Back</button>
+            {% endif %}
+            <button type="button" class="next-btn" onclick="{% if loop.last %}submitForm(){% else %}changeTab(1){% endif %}">
+                {% if loop.last %}Submit{% else %}Next{% endif %}
+            </button>
+        </div>
+    {% endfor %}
+</form>    
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+.formbold-section-break {
+        margin-top: 15px;
+        margin-bottom: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+    }
+.upload-area {
+    text-align: center;
+    padding: 40px;
+    border: 2px dashed #9370DB;
+    border-radius: 10px;
+    background-color: #E6E6FA;
+    color: #4B0082;
+    margin: 10px 0;
+}
+.drop-text {
+    font-size: 18px;
+    font-weight: bold;
+}
+.or-text {
+    margin: 10px 0;
+    font-size: 14px;
+}
+.browse-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.browse-btn:hover {
+    background-color: #45a049;
+}
+.file-list {
+    margin-top: 10px;
+}
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f3f4f6;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+.progress-bar {
+    width: 70%;
+    height: 5px;
+    background: #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+    position: relative;
+}
+.progress-bar-fill {
+    width: 100%;
+    height: 100%;
+    background: #e9d6f7;
+    border-radius: 5px;
+}
+.remove-btn {
+    background: none;
+    border: none;
+    color: #4B0082;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 5px;
+}
+.remove-btn:hover {
+    color: #ff5c5c;
+}
+
+.formbold-section {
+    display: none;
+}
+.formbold-section.active {
+    display: block;
+}
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+.prev-btn, .next-btn, .submit-btn {
+    padding: 10px 20px;
+    background: #4B0082;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+.prev-btn:hover, .next-btn:hover, .submit-btn:hover {
+    background: #3a0066;
+}
+    .first-tab {
+        justify-content: flex-end;
+    }
+.completed .node {
+    background-color: #50d050 !important;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 40px;  /* Adjust circle size */
+    height: 40px;
+    font-size: 22px;  /* Make tick bigger */
+    border: 3px solid white; /* Outer white ring */
+}
+.completed .node::before {
+    content: "✔"; 
+    font-size: 40px; /* Adjust tick size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+.current .node {
+    background-color: #726aeb !important; /* Gray color for the current tab */
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+    border: 3px solid white;
+}
+.current .node::before {
+    content: "↓"; 
+    font-size: 40px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+.error .node {
+    background-color: #eb5858 !important;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 40px;  /* Adjust circle size */
+    height: 40px;
+    font-size: 22px;  /* Make tick bigger */
+    border: 3px solid white;
+}
+.error .node::before {
+    content: "!";
+    font-size: 40px; /* Adjust tick size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.in-progress .node {
+    background-color: gray !important;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 40px;  /* Adjust circle size */
+    height: 40px;
+    font-size: 22px;  /* Make tick bigger */
+    border: 3px solid white; font-weight: bold;
+}
+
+.in-progress .node::before {
+    content: "↓";
+    font-size: 40px;  /* Adjust to center properly */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+} 
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    margin: 0 20px;
+}
+
+.stepper-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    overflow: hidden; /* Prevents extra steps from showing */
+}
+
+
+.step.current {
+    color: white;
+    font-weight: bold;
+}
+
+.node {
+    font-size: 18px;
+}
+
+.step.hidden {
+    display: none; /* Hide steps when shifting */
+}
+
+.wizard-progress {
+    & .step {
+        .node {
+            display: inline-block;
+            border: 6px solid #4B0082;
+            background-color: #fff;
+            border-radius: 80px;
+            height: 80px;
+            width: 80px;
+            position: absolute;
+            top: 45px;
+            left: 9%;
+            margin-left: -18px;
+        }
+    }
+}
+
+.wizard-progress {
+    & .step {
+        &:not(:last-child):before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 1%;
+            top: 80px;
+            background-color: #07c;
+            height: 6px;
+            width: 100%;
+            border: 1px solid #9C27B0 !important;
+        }
+    }
+}
+
+.card {
+    background: #f0edf000;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: fit-content;
+    text-align: center;
+    height: 200px;
+}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f7ff;
+      color: #333;
+    }
+    .formbold-sidebar {
+        width: 250px;
+        background: #007bff;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .formbold-sidebar button {
+        background: white;
+        color: #007bff;
+        border: none;
+        padding: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        text-align: left;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+        transition: background 0.3s ease;
+    }
+
+    .formbold-sidebar button:hover, .sidebar button.active {
+        background: #0056b3;
+        color: white;
+    }
+    .formbold-section {
+      display: none; /* Initially hidden */
+      width: 100%;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: #fefaff;
+      margin-top: -75px;
+    }
+
+    .formbold-section.active {
+        display: block; /* Show only the active section */
+    }
+
+    .formbold-main-wrapper {
+      display: flex;
+      /* align-items: center; */
+      justify-content: center;
+      min-height: 100vh;
+      padding: 0 48px;
+    }
+    .formbold-form-wrapper {
+      min-width: 1100px;
+      width: 100%;
+      background: #fff;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    .formbold-form-wrapper img {
+      height: 20em;
+      display: flex;
+      justify-self: center;
+      /* align-items: center; */
+    }
+    .formbold-form-input {
+      width: 50%;
+      padding: 12px;
+      border-radius: 5px;
+      border: 1px solid #dde3ec;
+      background: #ffffff;
+      font-size: 16px;
+      color: #536387;
+      outline: none;
+      resize: none;
+      transition: 0.3s;
+    }
+    .formbold-form-input:focus {
+      border-color: #6a64f1;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+    }
+    .formbold-form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #07074d;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .formbold-form-label h5 {
+      /* text-align: center; */
+      font-size: x-large;
+      font-weight: bold;
+      color: #9C27B0;
+      text-decoration: underline;
+    }
+    .formbold-mb-6 {
+      margin-bottom: 24px;
+    }
+    .formbold-radio-flex {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .formbold-radio-group {
+      display: flex;
+      align-items: center;
+    }
+    .formbold-radio-label {
+      font-size: 14px;
+      line-height: 24px;
+      color: #07074d;
+      position: relative;
+      padding-left: 25px;
+      cursor: pointer;
+    }
+    .formbold-input-radio {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .formbold-radio-checkmark {
+      position: absolute;
+      top: 2px;
+      left: 0;
+      height: 19px;
+      width: 19px;
+      background-color: #ffffff;
+      border: 2px solid #5f4fe9;
+      border-radius: 50%;
+    }
+    .formbold-input-radio:checked ~ .formbold-radio-checkmark {
+      background-color: #6a64f1;
+    }
+    .formbold-radio-checkmark:after {
+      content: '';
+      position: absolute;
+      display: none;
+    }
+    .formbold-input-radio:checked ~ .formbold-radio-checkmark:after {
+      display: block;
+    }
+    .formbold-radio-checkmark:after {
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffffff;
+      transform: translate(-50%, -50%);
+    }
+    .formbold-btn {
+      text-align: center;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 5px;
+      padding: 14px 25px;
+      border: none;
+      font-weight: 500;
+      background-color: #6a64f1;
+      color: white;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: 0.3s;
+    }
+    .formbold-btn:hover {
+      background-color: #5a54e6;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+    }
+    .formbold-steps {
+    padding-bottom: 18px;
+    margin-bottom: 35px;
+    border-bottom: 1px solid #DDE3EC;
+  }
+  .formbold-steps ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    gap: 40px;
+  }
+  .formbold-steps li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: #536387;
+  }
+  .formbold-steps li span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #DDE3EC;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: #536387;
+  }
+  .formbold-steps li.active {
+    color: #07074D;;
+  }
+  .formbold-steps li.active span {
+    background: #6A64F1;
+    color: #FFFFFF;
+  }
+
+ .ios-checkbox { 
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ios-checkbox input {
+  display: none;
+}
+
+.checkbox-wrapper {
+  position: relative;
+  width: 19px;
+  height: 19px;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.checkbox-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  border: 2px solid #5f4fe9;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.checkbox-icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 80%;
+  height: 80%;
+  color: white;
+  transform: scale(0);
+  transition: all 0.2s ease;
+}
+
+.check-path {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  transition: stroke-dashoffset 0.3s ease 0.1s;
+}
+
+/* Checked State */
+.ios-checkbox input:checked + .checkbox-wrapper .checkbox-bg {
+  background: #5f4fe9;
+  border-color: #5f4fe9;
+}
+
+.ios-checkbox input:checked + .checkbox-wrapper .checkbox-icon {
+  transform: scale(1);
+}
+
+.ios-checkbox input:checked + .checkbox-wrapper .check-path {
+  stroke-dashoffset: 0;
+}
+
+/* Hover Effects
+.ios-checkbox:hover .checkbox-wrapper {
+  transform: scale(1.05);
+} */
+
+/* Active Animation */
+.ios-checkbox:active .checkbox-wrapper {
+  transform: scale(0.95);
+}
+
+/* Focus Styles */
+.ios-checkbox input:focus + .checkbox-wrapper .checkbox-bg {
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+@media (max-width: 768px) {
+        .formbold-main-wrapper {
+            padding: 0px;
+            display: block;
+        }
+        .formbold-form-wrapper {
+            min-width: auto;
+            width: 100%;
+            padding: 20px;
+        }
+        .formbold-form-input {
+            width: 100%;
+        }
+        .formbold-navbar {
+            flex-direction: row;
+            overflow: auto;
+        }
+        .formbold-navbar .formbold-navbar-btn {
+            width: 100%;
+            text-align: left;
+        }
+        .formbold-btn {
+            width: 100%;
+        }
+        img {
+            width: 100%;
+            height: auto;
+        }
+    }
+
+
+
+    .wizard-progress{
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  position:relative;
+  
+  .step{
+    display: table-cell;
+    text-align: left;
+    vertical-align: top;
+    overflow: visible;
+    position:relative;
+    font-size: 14px;
+    color: #4e005e;
+    font-weight: bold;
+/*    
+    &:not(:last-child):before{
+      content: '';
+      display:block;
+      position: absolute;
+      left: 50%;
+      top: 80px;
+      background-color: #07c;
+      height: 6px;
+      width: 100%;
+      border: 1px solid #9C27B0 !important;
+    }
+
+    
+    .node{
+      position: absolute;
+      top: 45px;
+      left: 27%;
+      margin-left: -18px;
+    }
+*/  
+    &.complete{
+      &:before{
+        background-color: #07c;
+        border-color: #4B0082;
+      }
+      .node{
+        border-color: #4B0082;
+        
+        &:before{
+          font-family: FontAwesome;
+        }
+      }
+    }
+    
+    &.in-progress{
+      &:before{
+        background: #07c;
+        background: -moz-linear-gradient(left,  #07c 0%, #fff 100%);
+        background: -webkit-linear-gradient(left,  #07c 0%, #fff 100%);
+        background: linear-gradient(to right, #9C27B0 0%, #fff 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(     startColorstr='#07c', endColorstr='#fff',GradientType=1 );
+      }
+      .node{
+        border-color: #07c;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+    .page-content-wrapper .container {
+        padding-left: 0rem;
+        padding-right: 0rem;
+    }
+
+    .container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .completed .node::before {
+    font-size: 25px;
+    }
+
+    .current .node::before {
+    font-size: 25px;
+    }
+
+    .error .node::before {
+    font-size: 25px;
+    }
+   
+   .wizard-progress {
+        & .step {
+            &:not(:last-child):before {
+                left: 0%; 
+                width: 100%; 
+                top: 70px; 
+                height: 3.5px; 
+            }
+        }
+    }
+
+.wizard-progress {
+        & .step {
+          .node {
+            height: 50px;
+            width: 50px;
+            border-radius: 50px;
+            border: 3.5px solid #4B0082;
+            left: 23%;
+        }
+    }
+}
+    .wizard-progress .step {
+        position: relative;
+    }
+
+    .wizard-progress .step span {
+        visibility: hidden; /* Hide labels by default */
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        position: absolute;
+       /* background: #4CAF50; */
+        background: #4B0082;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        white-space: nowrap;
+        font-size: 12px;
+        top: -5px; /* Position above the step */
+        left: 50%;
+        transform: translateX(-50%) scale(0.95);
+        pointer-events: none;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); 
+    }
+
+    .wizard-progress .step:hover span {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+    
+    .wizard-progress .step:hover {
+        background: none !important;
+        filter: none !important;
+    }
+} 
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+let currentTab = 0;
+const sections = document.querySelectorAll('.formbold-section');
+const navs = document.querySelectorAll('.form-navigation');
+const steps = document.querySelectorAll('.step');
+const maxVisibleSteps = 5; // Only show 5 steps at a time
+let startStep = 0;
+
+function showTab(index) {
+    sections.forEach((section, i) => {
+        section.style.display = i === index ? 'block' : 'none';
+    });
+    navs.forEach((nav, i) => {
+        nav.style.display = i === index ? 'flex' : 'none';
+    });
+
+    updateStepIndicator();
+}
+
+function changeTab(step) {
+    if (step === 1) { // If moving forward, validate fields
+        let isValid = validateForm();
+        if (!isValid) return; // Stop moving to the next tab if invalid
+    }
+
+    // Remove tick from the current tab before switching
+    steps[currentTab].classList.remove("completed", "current", "error");
+    steps[currentTab].querySelector(".node").innerHTML = "";
+
+    // Update the tab index
+    currentTab += step;
+
+    if (currentTab >= sections.length) currentTab = sections.length - 1;
+    if (currentTab < 0) currentTab = 0;
+
+    // Show the updated tab
+    showTab(currentTab);
+
+    // If moving forward, add a tick to the previous step
+    if (step === 1 && currentTab > 0) {
+        steps[currentTab - 1].classList.add("completed");
+        steps[currentTab - 1].querySelector(".node").innerHTML = "✔";
+    }
+
+    updateStepIndicator();
+}
+
+function validateForm() {
+    let currentSection = sections[currentTab];
+    let inputs = currentSection.querySelectorAll('input, textarea, select');
+    let isValid = true;
+
+    inputs.forEach(input => {
+        let isRequired = input.hasAttribute("required"); // Check if the field is required
+
+        if (isRequired && input.value.trim() === '') {
+            input.style.border = '2px solid red';
+            isValid = false;
+        } else {
+            input.style.border = '1px solid #ccc';
+        }
+
+        // Remove red border when user starts typing
+        input.addEventListener("input", function () {
+            input.style.border = '1px solid #ccc';
+        });
+    });
+
+    if (!isValid) {
+        steps[currentTab].classList.add("error");
+        steps[currentTab].querySelector(".node").innerHTML = "";
+        steps[currentTab].querySelector(".node").style.backgroundColor = "red";
+    } else {
+        steps[currentTab].classList.remove("error");
+        steps[currentTab].querySelector(".node").style.backgroundColor = "";
+    }
+
+    return isValid;
+}
+
+function updateStepIndicator() {
+  if (currentTab >= startStep + maxVisibleSteps) {
+        startStep++; // Shift step range forward
+    } else if (currentTab < startStep) {
+        startStep--; // Shift step range backward
+    }
+
+    steps.forEach((step, i) => {
+     if (i < startStep || i >= startStep + maxVisibleSteps) {
+            step.classList.add("hidden");
+        } else {
+            step.classList.remove("hidden");
+        }
+  
+      if (i < currentTab) {
+            step.classList.add("completed");
+            step.querySelector(".node").innerHTML = "";
+        } else if (i === currentTab) {
+            step.classList.add("current");
+            step.querySelector(".node").innerHTML = "";
+        } else {
+            step.classList.remove("completed","in-progress", "error", "current");
+            step.querySelector(".node").innerHTML = "";
+            step.querySelector(".node").style.backgroundColor = "";
+        }
+
+    });
+}
+showTab(currentTab);
+updateStepIndicator();
+
+
+$(document).ready(function() {
+ $(".formbold-navbar-btn").click(function() {
+        $(".formbold-navbar-btn").removeClass("active");
+        $(this).addClass("active");
+        $(".formbold-section").removeClass("active").hide();
+        let target = $(this).data("target");
+        $(target).fadeIn().addClass("active");
+    });
+
+    $(".formbold-btn").off("click").on("click", function(event) {
+        event.preventDefault();
+        var data = {};
+        var file = null;
+
+        $("form :input").each(function() {
+            var input = $(this);
+            var name = input.attr("name");
+            var type = input.attr("type");
+            var value = input.val();
+
+            if (name) {
+                if (type === "checkbox") {
+                    var c_name = input.attr("child_name");
+                    if (!data[name]) data[name] = [];
+                    if (input.is(":checked")) data[name].push({ [c_name]: value });
+                } else if (type === "radio") {
+                    if (input.is(":checked")) data[name] = value;
+                } else if (type === "file") {
+                    file = input[0].files[0];
+                } else if (input.hasClass('child-field')) {
+                    var parentField = input.attr('parent_name');
+                    var childField = input.attr('child_name');
+                    if (!data[parentField]) data[parentField] = [];
+                    var existing = data[parentField].find(row => row[childField] === value);
+                    if (!existing) {
+                        var childRow = {};
+                        childRow[childField] = value;
+                        data[parentField].push(childRow);
+                    }
+                } else {
+                    data[name] = value;
+                }
+            }
+        });
+
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var file_content = e.target.result.split(",")[1];
+                frappe.call({
+                    method: "frappe.client.insert",
+                    args: {
+                        doc: {
+                            doctype: "File",
+                            file_name: file.name,
+                            content: file_content,
+                            is_private: 1
+                        }
+                    },
+                    callback: function(r) {
+                        if (!r.exc) {
+                            data["pdf"] = r.message.file_url;
+                            submitMedicalForm(data);
+                        } else {
+                            frappe.msgprint("File upload failed", "Error");
+                        }
+                    }
+                });
+            };
+            reader.readAsDataURL(file);
+        } else {
+            submitMedicalForm(data);
+        }
+    });
+});
+
+function submitMedicalForm(data) {
+    frappe.call({
+        method: "frappe.client.insert",
+        args: {
+            doc: {
+                doctype: "Medical",
+                ...data
+            }
+        },
+        callback: function(r) {
+            if (!r.exc) {
+                frappe.msgprint("Thank you for your message", "Message Sent");
+            } else {
+                frappe.msgprint("There was an error submitting your form", "Error");
+            }
+        }
+    });
+}
+function addFiles(event, fileListId) {
+    const fileList = document.getElementById(fileListId);
+    const files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+        const existingFile = [...fileList.children].some(item => item.querySelector('span').innerText === files[i].name);
+        if (!existingFile) {
+            const fileURL = URL.createObjectURL(files[i]);
+            fileList.innerHTML += `
+                <div class="file-item">
+                    <span>${files[i].name}</span>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
+                </div>
+            `;
+        }
+    }
+}
+
+function handleDrop(event, fileListId) {
+    event.preventDefault();
+    addFiles({ target: { files: event.dataTransfer.files } }, fileListId);
+}
+
+
+  frappe.ready(function () {
+        $(".formbold-navbar-btn").click(function() {
+            // Remove active class from all buttons
+            $(".formbold-navbar-btn").removeClass("active");
+            $(this).addClass("active");
+
+            // Hide all sections
+            $(".formbold-section").removeClass("active").hide();
+
+            // Show the selected section with fade effect
+            let target = $(this).data("target");
+            $(target).fadeIn().addClass("active");
+        });
+      $(".formbold-btn").off("click").on("click", function (event) {
+          event.preventDefault(); // Prevent default form submission
+  
+          var data = {}; // Object to store form data dynamically
+          var isValid = true;
+  
+          // Loop through all form inputs and collect data
+          $("form :input").each(function () {
+              var input = $(this);
+              var name = input.attr("name");
+              var type = input.attr("type");
+              var value = input.val();
+  
+              if (name) {
+                  if (type === "checkbox") {
+                    var c_name = input.attr("child_name");
+                    if (!data[name]) {
+                      data[name] = [];
+                    }
+                    
+                    if (input.is(":checked")) {
+                      data[name].push({ [c_name]: value });
+                    }
+                  } else if (type === "radio") {
+                      if (input.is(":checked")) {
+                          data[name] = value;
+                      }
+                  } else {
+                      data[name] = value;
+                  }
+              }
+          });
+  
+          // Submit data using frappe.call()
+          console.log(data);
+          frappe.call({
+              type: "POST",
+              method: "demo_app.www.FORM.update_data",
+              args: {
+				        data:data,
+			        },
+              callback: function (r) {
+                  if (!r.exc) {
+                      frappe.msgprint("{{ _('Thank you for your message') }}", "{{ _('Message Sent') }}");
+                  }
+              },
+          });
+      });
+  });
+
+function submitForm() {
+    var data = {};
+    $("form :input").each(function () {
+        var input = $(this);
+        var name = input.attr("name");
+        var value = input.val();
+
+        if (name) {
+            data[name] = value;
+        }
+    });
+
+    console.log("Submitting Data:", data); // Debugging
+
+    // Get current filename dynamically
+    var currentPath = window.location.pathname; // Example: "/exa"
+    var fileName = currentPath.split("/").pop(); // Extract "exa"
+
+    frappe.call({
+        method: "demo_app.www.FORM.update_data",
+        args: { data: JSON.stringify(data) },
+        callback: function (r) {
+            if (!r.exc) {
+                setTimeout(function () {
+                    window.location.href = "/" + fileName + "_success"; // Redirect dynamically
+                }, 500); // Short delay before redirection
+            }
+        }
+    });
+}
+
+  </script>
+  
+
+{% endblock %}

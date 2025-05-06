@@ -1,0 +1,306 @@
+{% extends "templates/web.html" %}
+
+{% block custom_page_title %}{{ _("Form 1") }}{% endblock %}
+
+{% block page_content %}
+<style>
+    .navbar {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        background: #b673e7;
+    }
+
+    .navbar a {
+        color: black;
+        text-decoration: none;
+        font-size: 18px;
+        margin-right: 20px;
+        cursor: pointer;
+    }
+
+    .formbold-navbar {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 20px;
+        border-bottom: 2px solid #ccc;
+    }
+
+    .formbold-navbar-btn {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        gap: 5px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        color: #4B0082;
+        position: relative;
+    }
+
+    .tab-circle {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #ccc;
+        color: black;
+        font-size: 14px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .formbold-navbar-btn.active .tab-circle {
+        background-color: #4B0082;
+        color: white;
+    }
+
+    .formbold-navbar-btn.completed .tab-circle {
+        background-color: green;
+        color: white;
+        font-weight: bold;
+    }
+
+    .dashboard-container {
+        display: none;
+        justify-content: center;
+        padding: 20px;
+        flex-direction: column;
+        align-items: center;
+    }
+
+.medical-form {
+    width: 100%; / Change from 60% to 100% /
+    max-width: 1500px; / Optional: Set a max width if needed /
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+    .medical-form label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+    }
+
+    .medical-form input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .save-button {
+        padding: 10px 20px;
+        background: #4B0082;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+</style>
+
+<div id="tab-navigation" class="formbold-navbar"> </div>
+<p>test {{ frappe.form_dict.page }}</p>
+
+<div id="medical-form-container" class="dashboard-container">
+    <form id="medical-form" class="medical-form"></form>
+</div>
+
+<script>
+async function loadMedical() {
+    try {
+        let metaResponse = await fetch(`/api/resource/DocType/Form 1`);
+        let metaData = await metaResponse.json();
+        let fields = metaData.data.fields;
+
+        let formContainer = document.getElementById("medical-form");
+        formContainer.innerHTML = "";
+
+        let tabNavContainer = document.getElementById("tab-navigation");
+        tabNavContainer.innerHTML = "";
+
+        let tabs = [];
+        let currentTab = null;
+        let firstTab = null;
+
+        fields.forEach((field, index) => {
+            if (field.fieldtype === "Tab Break") {
+                let tabButton = document.createElement("button");
+                tabButton.classList.add("formbold-navbar-btn");
+                tabButton.setAttribute("data-target", `#${field.fieldname}`);
+
+                let tabCircle = document.createElement("span");
+                tabCircle.classList.add("tab-circle");
+                tabCircle.textContent = index + 1;
+
+                let tabLabel = document.createElement("span");
+                tabLabel.textContent = field.label;
+
+                tabButton.appendChild(tabCircle);
+                tabButton.appendChild(tabLabel);
+
+                if (index === 0) {
+                    tabButton.classList.add("active");
+                    firstTab = field.fieldname;
+                }
+
+                tabNavContainer.appendChild(tabButton);
+
+                currentTab = document.createElement("div");
+                currentTab.id = field.fieldname;
+                currentTab.classList.add("tab-section");
+                currentTab.style.display = (index === 0) ? "block" : "none";
+                formContainer.appendChild(currentTab);
+
+                tabs.push(currentTab);
+            }
+
+            let fieldHtml = "";
+            if (field.fieldtype === "Data") {
+                fieldHtml = `
+                    <div class="form-group">
+                        <label>${field.label}</label>
+                        <input type="text" name="${field.fieldname}" class="form-control" placeholder="${field.label}" />
+                    </div>
+                `;
+            }
+
+            if (currentTab) {
+                currentTab.innerHTML += fieldHtml;
+            } else {
+                formContainer.innerHTML += fieldHtml;
+            }
+        });
+
+        document.getElementById("medical-form-container").style.display = "block";
+
+        document.querySelectorAll(".formbold-navbar-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                document.querySelectorAll(".formbold-navbar-btn").forEach(btn => btn.classList.remove("active"));
+                this.classList.add("active");
+
+                document.querySelectorAll(".tab-section").forEach(section => section.style.display = "none");
+
+                let targetTab = document.querySelector(this.getAttribute("data-target"));
+                if (targetTab) {
+                    targetTab.style.display = "block";
+                }
+            });
+        });
+
+        addNavigationButtons(tabs);
+    } catch (error) {
+        console.error("Error loading medical form:", error);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(() => {
+        let circles = document.querySelectorAll(".tab-circle");
+        circles.forEach(circle => {
+            circle.textContent = ""; // Make circles completely empty
+        });
+    }, 500); // Small delay to ensure the DOM is fully loaded
+});
+
+function switchTab(offset) {
+    let tabs = document.querySelectorAll(".formbold-navbar-btn");
+    let activeTab = document.querySelector(".formbold-navbar-btn.active");
+    let tabIndex = Array.from(tabs).indexOf(activeTab);
+    let newIndex = tabIndex + offset;
+
+    if (newIndex >= 0 && newIndex < tabs.length) {
+        if (offset > 0) {
+            // Moving forward: Add ✔ inside the circle
+            let completedTab = tabs[tabIndex];
+            completedTab.classList.add("completed");
+            completedTab.querySelector(".tab-circle").textContent = "✔";
+        } else {
+            // Moving backward: Make the circle empty again
+            let previousTab = tabs[tabIndex];
+            if (previousTab) {
+                previousTab.classList.remove("completed");
+                previousTab.querySelector(".tab-circle").textContent = ""; // Ensure it stays empty
+            }
+        }
+
+        // Activate the new tab
+        tabs[newIndex].click();
+    }
+}
+
+function addNavigationButtons(tabs) {
+    tabs.forEach((section, index) => {
+        let buttonContainer = document.createElement("div");
+        buttonContainer.classList.add("button-container");
+
+        if (index > 0) {
+            let backButton = document.createElement("button");
+            backButton.textContent = "Back";
+            backButton.classList.add("save-button");
+            backButton.addEventListener("click", function () {
+                switchTab(-1);
+            });
+            buttonContainer.appendChild(backButton);
+        } else {
+            buttonContainer.appendChild(document.createElement("div"));
+        }
+
+        if (index < tabs.length - 1) {
+            let nextButton = document.createElement("button");
+            nextButton.textContent = "Next";
+            nextButton.classList.add("save-button");
+            nextButton.addEventListener("click", function () {
+                switchTab(1);
+            });
+            buttonContainer.appendChild(nextButton);
+        } else {
+            let submitButton = document.createElement("button");
+            submitButton.textContent = "Submit";
+            submitButton.classList.add("save-button");
+            submitButton.addEventListener("click", submitMedicalForm);
+            buttonContainer.appendChild(submitButton);
+        }
+
+        section.appendChild(buttonContainer);
+    });
+}
+
+async function submitMedicalForm(event) {
+    event.preventDefault();
+
+    let formData = new FormData(document.getElementById("medical-form"));
+    let jsonData = {};
+    formData.forEach((value, key) => { jsonData[key] = value; });
+
+    let response = await fetch("/api/resource/Form 1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(jsonData)
+    });
+
+    if (response.ok) {
+        alert("Form submitted successfully!");
+    } else {
+        alert("Error submitting form.");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadMedical);
+</script>
+
+{% endblock %}

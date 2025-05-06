@@ -1,0 +1,586 @@
+{% extends "templates/web.html" %}
+
+{% block title %}
+{{ _("WEB PORTAL") }}
+{% endblock %}
+
+{% block page_content %}
+<div class="formbold-main-wrapper">
+    
+    <div class="formbold-form-wrapper">
+      <div>
+        <img src="/files/genetic-scientists-conducting-research-experiment.png">
+        <hr>
+        
+      </div>
+      <div class="wizard-progress">
+        <div class="step complete">
+          SECTION 1
+          <div class="node"></div>
+        </div>
+        <div class="step complete">
+          SECTION 2
+          <div class="node"></div>
+        </div>
+        <div class="step in-progress">
+          SECTION 3
+          <div class="node"></div>
+        </div>
+        <div class="step">
+          SECTION 4
+          <div class="node"></div>
+        </div>
+        <div class="step">
+          SECTION 5
+          <div class="node"></div>
+        </div>
+      </div>
+      <br>
+      <br>
+      <br>
+      <br>
+        
+      <form method="POST">
+       
+        {% for field in fields %}
+            {% if field.fieldtype == "Tab Break" %}
+              {% if loop.index != 1 %}</div>{% endif %}
+              <div class="formbold-section {% if loop.first %}active{% endif %}" id="{{ field.fieldname }}">
+            {% endif %}
+            <div class="formbold-mb-6">
+                {% if field.fieldtype == "Section Break" %}
+                  <label class="formbold-form-label wb-{{ field.fieldtype| replace(' ', '-') }}"><h5>{{ field.label }}</h5></label>
+                  {% if field.description %}<p>{{ field.description }}</p> {% endif %}
+                {% else %}
+                  <label class="formbold-form-label">{% if field.label %}{{ field.label }} {% endif %}</label>
+                {% endif %}
+  
+                {% if field.fieldtype == "Data" or field.fieldtype == "Link" %}
+                    <input type="text" class="formbold-form-input" name="{{ field.fieldname }}" placeholder="" />
+                {% elif field.fieldtype == "Date" %}
+                    <input type="date" class="formbold-form-input" name="{{ field.fieldname }}" />
+                {% elif field.fieldtype == "Int" or field.fieldtype == "Currency"  or field.field%}
+                    <input type="number" class="formbold-form-input" name="{{ field.fieldname }}" />
+                {% elif field.fieldtype == "Small Text" or field.fieldtype == "Text" %}
+                    <textarea name="{{ field.fieldname }}" id="message" placeholder="Type here..." class="formbold-form-input" ></textarea>
+                {% elif field.fieldtype == "Select" and field.options %}
+                    <div class="formbold-radio-flex">
+                        {% for option in field.options.split("\n") %}
+                            <div class="formbold-radio-group">
+                                <label class="formbold-radio-label">
+                                    <input type="radio" class="formbold-input-radio" name="{{ field.fieldname }}" value="{{ option }}" />
+                                    {{ option }}
+                                    <span class="formbold-radio-checkmark"></span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% elif field.fieldtype == "Select" and field.options %}
+                  <select class="formbold-form-input" name="{{ field.fieldname }}">
+                    {% for option in field.options.split("\n") %}
+                        <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                  </select>
+                {% elif field.fieldtype == "Table MultiSelect" %}
+                {% set child_field = frappe.get_doc('DocField',{'parent':'Test select','fieldtype':'Link'},['fieldname']).fieldname %}
+                <div class="formbold-radio-flex">
+                  {% for option in frappe.get_list('custom Data', fields=['name', 'selected_items']) %}
+                    <label class="ios-checkbox purple">
+                      <input class="formbold-input-radio" type="checkbox" child_name="{{ child_field }}" name="{{ field.fieldname }}" value="{{ option.name }}" />
+                      <div class="checkbox-wrapper">
+                        <div class="checkbox-bg"></div>
+                        <svg fill="none" viewBox="0 0 24 24" class="checkbox-icon">
+                          <path stroke-linejoin="round" stroke-linecap="round" stroke-width="3" stroke="currentColor" d="M4 12L10 18L20 6" class="check-path"></path>
+                        </svg>
+                      </div>
+                      {{ option.name }}
+                    </label>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <div>
+                  {% if field.description %}{{ field.description }}{% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        <button class="formbold-btn">Submit</button>
+    </form>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f7ff;
+      color: #333;
+    }
+    .formbold-sidebar {
+        width: 250px;
+        background: #007bff;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .formbold-sidebar button {
+        background: white;
+        color: #007bff;
+        border: none;
+        padding: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        text-align: left;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+        transition: background 0.3s ease;
+    }
+
+    .formbold-sidebar button:hover, .sidebar button.active {
+        background: #0056b3;
+        color: white;
+    }
+    .formbold-section {
+      display: none; /* Initially hidden */
+      width: 100%;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: #fefaff;
+      margin-top: 20px;
+    }
+
+    .formbold-section.active {
+        display: block; /* Show only the active section */
+    }
+
+    .formbold-main-wrapper {
+      display: flex;
+      /* align-items: center; */
+      justify-content: center;
+      min-height: 100vh;
+      padding: 0 48px;
+    }
+    .formbold-form-wrapper {
+      min-width: 1100px;
+      width: 100%;
+      background: #fff;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    .formbold-form-wrapper img {
+      height: 20em;
+      display: flex;
+      justify-self: center;
+      /* align-items: center; */
+    }
+    .formbold-form-input {
+      width: 50%;
+      padding: 12px;
+      border-radius: 5px;
+      border: 1px solid #dde3ec;
+      background: #ffffff;
+      font-size: 16px;
+      color: #536387;
+      outline: none;
+      resize: none;
+      transition: 0.3s;
+    }
+    .formbold-form-input:focus {
+      border-color: #6a64f1;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+    }
+    .formbold-form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #07074d;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .formbold-form-label h5 {
+      /* text-align: center; */
+      font-size: x-large;
+      font-weight: bold;
+      color: #9C27B0;
+      text-decoration: underline;
+    }
+    .formbold-mb-6 {
+      margin-bottom: 24px;
+    }
+    .formbold-radio-flex {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .formbold-radio-group {
+      display: flex;
+      align-items: center;
+    }
+    .formbold-radio-label {
+      font-size: 14px;
+      line-height: 24px;
+      color: #07074d;
+      position: relative;
+      padding-left: 25px;
+      cursor: pointer;
+    }
+    .formbold-input-radio {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .formbold-radio-checkmark {
+      position: absolute;
+      top: 2px;
+      left: 0;
+      height: 19px;
+      width: 19px;
+      background-color: #ffffff;
+      border: 2px solid #5f4fe9;
+      border-radius: 50%;
+    }
+    .formbold-input-radio:checked ~ .formbold-radio-checkmark {
+      background-color: #6a64f1;
+    }
+    .formbold-radio-checkmark:after {
+      content: '';
+      position: absolute;
+      display: none;
+    }
+    .formbold-input-radio:checked ~ .formbold-radio-checkmark:after {
+      display: block;
+    }
+    .formbold-radio-checkmark:after {
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffffff;
+      transform: translate(-50%, -50%);
+    }
+    .formbold-btn {
+      text-align: center;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 5px;
+      padding: 14px 25px;
+      border: none;
+      font-weight: 500;
+      background-color: #6a64f1;
+      color: white;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: 0.3s;
+    }
+    .formbold-btn:hover {
+      background-color: #5a54e6;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+    }
+    .formbold-steps {
+    padding-bottom: 18px;
+    margin-bottom: 35px;
+    border-bottom: 1px solid #DDE3EC;
+  }
+  .formbold-steps ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    gap: 40px;
+  }
+  .formbold-steps li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: #536387;
+  }
+  .formbold-steps li span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #DDE3EC;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: #536387;
+  }
+  .formbold-steps li.active {
+    color: #07074D;;
+  }
+  .formbold-steps li.active span {
+    background: #6A64F1;
+    color: #FFFFFF;
+  }
+
+
+    .ios-checkbox {
+  
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ios-checkbox input {
+  display: none;
+}
+
+.checkbox-wrapper {
+  position: relative;
+  width: 19px;
+  height: 19px;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.checkbox-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  border: 2px solid #5f4fe9;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.checkbox-icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 80%;
+  height: 80%;
+  color: white;
+  transform: scale(0);
+  transition: all 0.2s ease;
+}
+
+.check-path {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  transition: stroke-dashoffset 0.3s ease 0.1s;
+}
+
+/* Checked State */
+.ios-checkbox input:checked + .checkbox-wrapper .checkbox-bg {
+  background: #5f4fe9;
+  border-color: #5f4fe9;
+}
+
+.ios-checkbox input:checked + .checkbox-wrapper .checkbox-icon {
+  transform: scale(1);
+}
+
+.ios-checkbox input:checked + .checkbox-wrapper .check-path {
+  stroke-dashoffset: 0;
+}
+
+/* Hover Effects
+.ios-checkbox:hover .checkbox-wrapper {
+  transform: scale(1.05);
+} */
+
+/* Active Animation */
+.ios-checkbox:active .checkbox-wrapper {
+  transform: scale(0.95);
+}
+
+/* Focus Styles */
+.ios-checkbox input:focus + .checkbox-wrapper .checkbox-bg {
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+@media (max-width: 768px) {
+        .formbold-main-wrapper {
+            padding: 20px;
+            display: block;
+        }
+        .formbold-form-wrapper {
+            min-width: auto;
+            width: 100%;
+            padding: 20px;
+        }
+        .formbold-form-input {
+            width: 100%;
+        }
+        .formbold-navbar {
+            flex-direction: row;
+            overflow: auto;
+        }
+        .formbold-navbar .formbold-navbar-btn {
+            width: 100%;
+            text-align: left;
+        }
+        .formbold-btn {
+            width: 100%;
+        }
+        img {
+            width: 100%;
+            height: auto;
+        }
+    }
+
+
+
+    .wizard-progress{
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  position:relative;
+  
+  .step{
+    display: table-cell;
+    text-align: center;
+    vertical-align: top;
+    overflow: visible;
+    position:relative;
+    font-size: 14px;
+    color: #4e005e;
+    font-weight: bold;
+    
+    &:not(:last-child):before{
+      content: '';
+      display:block;
+      position: absolute;
+      left: 50%;
+      top: 80px;
+      background-color: #fff;
+      height: 6px;
+      width: 100%;
+      border: 1px solid #9C27B0 !important;
+    }
+    
+    .node{
+      display: inline-block;
+      border: 6px solid #9C27B0;
+      background-color: #fff;
+      border-radius: 80px;
+      height: 80px;
+      width: 80px;
+      position: absolute;
+      top: 45px;
+      left: 40%;
+      margin-left: -18px;
+    }
+    
+    &.complete{
+      &:before{
+        background-color: #07c;
+        border-color: #9C27B0;
+      }
+      .node{
+        border-color: #9C27B0;
+        background-color: #07c;
+        
+        &:before{
+          font-family: FontAwesome;
+          content: "\f00c";
+        }
+      }
+    }
+    
+    &.in-progress{
+      &:before{
+        background: #07c;
+        background: -moz-linear-gradient(left,  #07c 0%, #fff 100%);
+        background: -webkit-linear-gradient(left,  #07c 0%, #fff 100%);
+        background: linear-gradient(to right, #9C27B0 0%, #fff 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(     startColorstr='#07c', endColorstr='#fff',GradientType=1 );
+      }
+      .node{
+        border-color: #07c;
+      }
+    }
+  }
+}
+
+   
+
+
+
+
+</style>
+
+<script>
+  frappe.ready(function () {
+        $(".formbold-navbar-btn").click(function() {
+            // Remove active class from all buttons
+            $(".formbold-navbar-btn").removeClass("active");
+            $(this).addClass("active");
+
+            // Hide all sections
+            $(".formbold-section").removeClass("active").hide();
+
+            // Show the selected section with fade effect
+            let target = $(this).data("target");
+            $(target).fadeIn().addClass("active");
+        });
+      $(".formbold-btn").off("click").on("click", function (event) {
+          event.preventDefault(); // Prevent default form submission
+  
+          var data = {}; // Object to store form data dynamically
+          var isValid = true;
+  
+          // Loop through all form inputs and collect data
+          $("form :input").each(function () {
+              var input = $(this);
+              var name = input.attr("name");
+              var type = input.attr("type");
+              var value = input.val();
+  
+              if (name) {
+                  if (type === "checkbox") {
+                    var c_name = input.attr("child_name");
+                    if (!data[name]) {
+                      data[name] = [];
+                    }
+                    
+                    if (input.is(":checked")) {
+                      data[name].push({ [c_name]: value });
+                    }
+                  } else if (type === "radio") {
+                      if (input.is(":checked")) {
+                          data[name] = value;
+                      }
+                  } else {
+                      data[name] = value;
+                  }
+              }
+          });
+  
+          // Submit data using frappe.call()
+          console.log(data);
+          frappe.call({
+              type: "POST",
+              method: "custom_app.www.test.update_data",
+              args: {
+				        data:data,
+			        },
+              callback: function (r) {
+                  if (!r.exc) {
+                      frappe.msgprint("{{ _('Thank you for your message') }}", "{{ _('Message Sent') }}");
+                  }
+              },
+          });
+      });
+  });
+  </script>
+  
+
+{% endblock %}
