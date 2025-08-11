@@ -1,0 +1,672 @@
+{% extends "templates/web.html" %}
+{% block page_content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    h2 {
+        text-align: center;
+        margin-top: 20px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #efe6f7; /* Light purple */
+    }
+
+    .search-container {
+        display: flex;
+        align-items: center;
+        margin: 15px 0;
+        padding: 10px;
+        background: #f0edf0;
+        border-radius: 8px;
+        justify-content: flex-end;
+        gap: 5px;
+    }
+     
+    .search-container label {
+       font-weight: bold;
+       color: #555;
+    }
+    
+    .search-container input {
+        padding: 8px;
+        width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .search-container input:focus {
+        border-color: #4a148c;
+    }
+
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+        margin-top: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    th {
+        background-color: #4a148c;
+        color: white;
+        font-weight: 600;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-top: 15px;
+        padding: 10px;
+        background: #f0edf0;
+        border-radius: 8px;
+    }
+
+    .record-counts {
+        text-align: left;
+        color: #555;
+    }
+
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .pagination-controls button {
+        padding: 6px 12px;
+        border: none;
+        background-color: #4a148c;
+        color: white;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .pagination-controls button:hover {
+        background-color: #6a1b9a;
+    }
+
+    .pagination-controls select {
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        outline: none;
+    }
+    
+    .view-details {
+        text-align: center;
+    }
+
+    .view-details i {
+        cursor: pointer;
+        color: #4a148c;
+        transition: color 0.3s;
+    }
+
+    .view-details i:hover {
+        color: #6a1b9a;
+    }
+
+    /* Modal styles for folder tree */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 90%;
+        max-width: 700px;
+        border-radius: 12px;
+    }
+
+     .modal-header {
+        background: linear-gradient(90deg, #6a1b9a, #ab47bc);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 500;
+    }
+
+    .close {
+        color: white;
+        font-size: 24px;
+        transition: color 0.3s;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+         color: #e0e0e0;
+    }
+
+    .tree-view {
+        font-family: Arial, sans-serif;
+        margin-top: 10px;
+    }
+
+    .tree-view ul {
+        list-style-type: none;
+        padding-left: 20px;
+    }
+
+    .tree-view li {
+        margin: 5px 0;
+        display: flex;
+        align-items: center;
+    }
+
+    
+    .tree-view .folder {
+        cursor: pointer;
+    }
+
+    .tree-view .folder::before {
+        content: "📁";
+    }
+
+    .tree-view .file::before {
+        content: "📄";
+    }
+
+ .modal-body {
+        padding: 20px;
+        background-color: #f9fafb;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .breadcrumb {
+        background-color: #e9ecef;
+        padding: 10px 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .breadcrumb span {
+        cursor: pointer;
+        color: #6a1b9a;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .breadcrumb span:hover {
+        color: #ab47bc;
+    }
+
+    .breadcrumb span:not(:last-child)::after {
+        content: ">";
+        color: #666;
+        margin: 0 8px;
+    }
+    .counts-table-container {
+        margin-top: 10px;
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+
+    .counts-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .counts-table th, .counts-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .counts-table th {
+        background-color: #4a148c;
+        color: white;
+    }
+
+    .counts-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+</style>
+
+<h2>Medical List</h2>
+
+<div class="search-container">
+    <label for="searchInput">Search:</label>
+    <input type="text" id="searchInput" placeholder="">
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>NGS Data Analysis</th>
+                <th>Project Name</th>
+                <th>View Details</th>
+            </tr>
+        </thead>
+        <tbody id="medical-table-body">
+            <tr>
+                <td colspan="6" style="text-align: center;">Loading data...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="pagination-container">
+    <div class="record-counts">
+        <span id="total-records">Total Records: 0</span><br>
+        <span id="filteredCount" style="display: none;">Filtered: <span id="filtered-records">0</span></span>
+    </div>
+
+    <div class="pagination-controls">
+        <span>Rows per Page:</span>
+        <select id="rowsPerPage">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+        </select>
+
+        <button id="firstPage">«</button>
+        <button id="prevPage">‹</button>
+        <span id="currentPage">1 / 1</span>
+        <button id="nextPage">›</button>
+        <button id="lastPage">»</button>
+
+    </div>
+</div>
+
+<!-- Modal for displaying folder tree -->
+<div id="folderModal" class="modal">
+    <div class="modal-content">
+       <div class="modal-header">     
+        <h3>Folder Structure</h3>
+        <span class="close">×</span>
+       </div>
+       
+       <div class="modal-body">       
+          <div id="breadcrumb" class="breadcrumb"></div>
+          <div id="countsTableContainer" class="counts-table-container">
+            <table id="countsTable" class="counts-table">
+                <thead>
+                    <tr>
+                        <th>Folder</th>
+                        <th>Subfolders</th>
+                        <th>Files</th>
+                    </tr>
+                </thead>
+                <tbody id="countsTableBody"></tbody>
+            </table>
+        </div>
+        <div id="folderTree" class="tree-view"></div>
+    </div>
+</div>
+</div>
+
+
+<script>
+    let originalData = [];
+    let data = [];
+    let currentPage = 1;
+    let rowsPerPage = 10;
+    let folderTreeData = [];
+    let currentlySelectedItem = null; // Track the currently selected item
+
+    frappe.ready(() => {
+        frappe.call({
+            method: "demo_app.api.get_medical_data",
+            callback: function(response) {
+                originalData = response.message || [];
+                data = [...originalData];
+                document.getElementById("total-records").innerText = "Total Records: " + data.length;
+                updateTable();
+            }
+        });
+    });
+
+    function updateTable() {
+        let tableBody = document.getElementById("medical-table-body");
+        tableBody.innerHTML = "";
+
+        let start = (currentPage - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+        let paginatedData = data.slice(start, end);
+
+        if (paginatedData.length > 0) {
+            paginatedData.forEach(record => {
+                let row = `<tr>
+                    <td>${record.name}</td>
+                    <td>${record.user_name}</td>
+                    <td>${record.email}</td>
+                    <td>${record.data}</td>
+                    <td>${record.project_name}</td>
+                    <td class="view-details"><i class="fa fa-eye" onclick="viewDetails('${record.name}', '${record.owner}')"></i></td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        } else {
+            tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>No records found.</td></tr>";
+        }
+
+        updatePaginationControls();
+    }
+
+    function viewDetails(userId, userName) {
+        sessionStorage.setItem('selectedUserId', userId);
+        sessionStorage.setItem('selectedUserName', userName);
+        fetchFolderStructure(userId, userName);
+    }
+
+    async function fetchFolderStructure(userId, userName) {
+        try {
+            const apiUrl = `http://192.168.1.15:7002/view-files?username=${encodeURIComponent(userName)}&formId=${encodeURIComponent(userId)}&folderPath=`;
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`API call failed with status ${response.status}`);
+            }
+
+            folderTreeData = await response.json();
+            displayFolderTree(folderTreeData, userName, userId);
+        } catch (error) {
+            console.error('Error fetching folder structure:', error);
+            alert('Failed to fetch folder structure: ' + error.message);
+        }
+    }
+
+    async function openFile(userName, userId, filePath) {
+        try {
+            const apiUrl = `http://192.168.1.15:7002/view-file-content?username=${encodeURIComponent(userName)}&formId=${encodeURIComponent(userId)}&filePath=${encodeURIComponent(filePath)}`;
+            const response = await fetch(apiUrl);
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch file content with status ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filePath.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error opening file:', error);
+            alert('Failed to open file: ' + error.message);
+        }
+    }
+
+    function displayFolderTree(folderTree, userName, userId) {
+        const treeContainer = document.getElementById('folderTree');
+        treeContainer.innerHTML = '';
+        const breadcrumbContainer = document.getElementById('breadcrumb');
+        breadcrumbContainer.innerHTML = '';
+        const countsTableBody = document.getElementById('countsTableBody');
+        countsTableBody.innerHTML = '';
+
+        // Initial breadcrumb with dynamic userName and userId
+        const initialPath = [
+            { name: userName || 'Administrator', path: [] },
+            { name: userId, path: [] }
+        ];
+        updateBreadcrumb(initialPath);
+
+        function updateBreadcrumb(path) {
+            breadcrumbContainer.innerHTML = '';
+            countsTableBody.innerHTML = ''; // Clear the counts table
+
+            // Only populate counts table if the last item in the path is a folder and path length is greater than initialPath
+            if (path.length > initialPath.length && path[path.length - 1].path !== null) {
+                let foldersToDisplay = [];
+
+                // Navigate through the folder hierarchy to find the current folder's children
+                let currentLevel = folderTree;
+                for (let i = initialPath.length; i < path.length; i++) {
+                    const folderName = path[i].name;
+                    const foundFolder = currentLevel.find(item => item.name === folderName && item.type === 'folder');
+                    if (foundFolder) {
+                        currentLevel = foundFolder.children || [];
+                    } else {
+                        break;
+                    }
+                }
+
+                // The current folder is the last one in the breadcrumb path
+                const currentFolderName = path[path.length - 1].name;
+                const counts = calculateCounts(currentLevel);
+                foldersToDisplay = [{ name: currentFolderName, subfolderCount: counts.subfolderCount, fileCount: counts.fileCount }];
+
+                // Populate the counts table based on the filtered folders
+                foldersToDisplay.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.subfolderCount}</td>
+                        <td>${item.fileCount}</td>
+                    `;
+                    countsTableBody.appendChild(row);
+                });
+            }
+
+            path.forEach((item, index) => {
+                const span = document.createElement('span');
+                span.textContent = item.name;
+                span.addEventListener('click', () => {
+                    // Collapse all folders and show only up to the clicked level
+                    treeContainer.innerHTML = '';
+                    const ul = document.createElement('ul');
+                    createTree(folderTree, ul, path.slice(0, index + 1));
+                    treeContainer.appendChild(ul);
+                    updateBreadcrumb(path.slice(0, index + 1));
+                });
+                breadcrumbContainer.appendChild(span);
+            });
+        }
+
+        function calculateCounts(items) {
+            let subfolderCount = 0;
+            let fileCount = 0;
+
+            items.forEach(item => {
+                if (item.type === 'folder') {
+                    subfolderCount++;
+                    if (item.children && item.children.length > 0) {
+                        const childCounts = calculateCounts(item.children);
+                        fileCount += childCounts.fileCount;
+                    }
+                } else if (item.type === 'file') {
+                    fileCount++;
+                }
+            });
+
+            return { subfolderCount, fileCount };
+        }
+
+        function createTree(items, parentUl, currentPath = initialPath) {
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = item.type === 'folder' ? 'folder' : 'file';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = item.name;
+                li.appendChild(nameSpan);
+
+                parentUl.appendChild(li);
+
+                if (item.type === 'folder' && item.children && item.children.length > 0) {
+                    const ul = document.createElement('ul');
+                    ul.className = 'hidden'; // Hide all children initially
+                    li.appendChild(ul);
+                    createTree(item.children, ul, [...currentPath, { name: item.name, path: item.children }]);
+                    
+                    // Add click event to toggle visibility and update breadcrumb
+                    li.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // Remove highlight from previously selected item
+                        if (currentlySelectedItem) {
+                            currentlySelectedItem.classList.remove('selected');
+                        }
+                        // Highlight the clicked folder
+                        li.classList.add('selected');
+                        currentlySelectedItem = li;
+
+                        ul.classList.toggle('hidden');
+                        const newPath = [...currentPath, { name: item.name, path: item.children }];
+                        updateBreadcrumb(newPath);
+                    });
+                } else if (item.type === 'file') {
+                    // Construct file path from breadcrumb
+                    li.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // Remove highlight from previously selected item
+                        if (currentlySelectedItem) {
+                            currentlySelectedItem.classList.remove('selected');
+                        }
+                        // Highlight the clicked file
+                        li.classList.add('selected');
+                        currentlySelectedItem = li;
+
+                        const newPath = [...currentPath, { name: item.name, path: null }];
+                        // Build file path excluding userName and userId
+                        const filePath = newPath.slice(2).map(p => p.name).join('/');
+                        openFile(userName, userId, filePath);
+                        updateBreadcrumb(newPath);
+                    });
+                }
+            });
+        }
+
+        const ul = document.createElement('ul');
+        createTree(folderTree, ul);
+        treeContainer.appendChild(ul);
+
+        const modal = document.getElementById('folderModal');
+        modal.style.display = 'block';
+    }
+
+    document.querySelector('.close').addEventListener('click', () => {
+        document.getElementById('folderModal').style.display = 'none';
+        // Clear the highlight when closing the modal
+        if (currentlySelectedItem) {
+            currentlySelectedItem.classList.remove('selected');
+            currentlySelectedItem = null;
+        }
+    });
+
+    window.addEventListener('click', (event) => {
+        const modal = document.getElementById('folderModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            // Clear the highlight when closing the modal
+            if (currentlySelectedItem) {
+                currentlySelectedItem.classList.remove('selected');
+                currentlySelectedItem = null;
+            }
+        }
+    });
+
+    function updatePaginationControls() {
+        let totalPages = Math.ceil(data.length / rowsPerPage);
+        document.getElementById("currentPage").innerText = `${currentPage} / ${totalPages || 1}`;
+    }
+
+    document.getElementById("rowsPerPage").addEventListener("change", function() {
+        rowsPerPage = parseInt(this.value);
+        currentPage = 1;
+        updateTable();
+    });
+
+    document.getElementById("firstPage").addEventListener("click", function() {
+        currentPage = 1;
+        updateTable();
+    });
+
+    document.getElementById("prevPage").addEventListener("click", function() {
+        if (currentPage > 1) {
+            currentPage--;
+            updateTable();
+        }
+    });
+
+    document.getElementById("nextPage").addEventListener("click", function() {
+        let totalPages = Math.ceil(data.length / rowsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            updateTable();
+        }
+    });
+
+    document.getElementById("lastPage").addEventListener("click", function() {
+        currentPage = Math.ceil(data.length / rowsPerPage);
+        updateTable();
+    });
+
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+        let searchValue = this.value.trim().toLowerCase();
+        let filteredCountElement = document.getElementById("filteredCount");
+        let filteredRecordsSpan = document.getElementById("filtered-records");
+
+        if (searchValue) {
+            data = originalData.filter(record => 
+                record.user_name.toLowerCase().includes(searchValue) || 
+                record.project_name.toLowerCase().includes(searchValue)
+            );
+            filteredCountElement.style.display = "inline";
+            filteredRecordsSpan.innerText = data.length;
+        } else {
+            data = [...originalData];
+            filteredCountElement.style.display = "none";
+        }
+
+        currentPage = 1;
+        updateTable();
+    });
+</script>
+{% endblock %}

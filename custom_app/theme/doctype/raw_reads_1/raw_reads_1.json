@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-02 12:20:50.135365",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "organism",
+  "bases",
+  "size",
+  "gc_content",
+  "published"
+ ],
+ "fields": [
+  {
+   "fieldname": "organism",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Organism"
+  },
+  {
+   "fieldname": "bases",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bases"
+  },
+  {
+   "fieldname": "size",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Size"
+  },
+  {
+   "fieldname": "gc_content",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "GC Content"
+  },
+  {
+   "fieldname": "published",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Published"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-02 12:22:13.806015",
+ "modified_by": "Administrator",
+ "module": "Theme",
+ "name": "Raw Reads 1",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

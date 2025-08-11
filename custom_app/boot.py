@@ -70,6 +70,8 @@ def custom_get_workspace_sidebar_items(bootinfo):
 		pages = [frappe.get_doc("Workspace", "Welcome Workspace").as_dict()]
 		pages[0]["label"] = _("Welcome Workspace")
 
+	bootinfo.home_page = "cloud-storage"
+	bootinfo.home_folder = "Cloud Storage"
 	bootinfo.custom_workspace = {
 		"pages": pages,
 		"has_access": has_access,

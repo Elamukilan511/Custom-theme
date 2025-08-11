@@ -29,13 +29,14 @@ app_include_css = ["/assets/custom_app/css/theme.css",
                 #    "/assets/custom_app/css/sidebar.css",
                    ]
 
-app_include_js = [
+app_include_js = ["/assets/custom_app/js/test.js",
+                    "https://cdn.plot.ly/plotly-3.1.0-rc.0.min.js",
                     # "/assets/custom_app/js/page.js",
                   "/assets/custom_app/js/theme.js",]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/custom_app/css/custom_app.css"
-# web_include_js = "/assets/custom_app/js/custom_app.js"
+web_include_js = ["/assets/custom_app/js/mega_menu.js",]
 
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "custom_app/public/scss/website"
@@ -56,12 +57,14 @@ app_include_js = [
 signup_form_template = "custom_app/templates/ms_signup.html"
 
 website_route_rules = [
+    {"from_route": "/custom_list/<path:doctype>", "to_route": "custom_list"},
     {"from_route": "/test/<path:doctype>", "to_route": "test"},
     {"from_route": "/f/<path:doctype>", "to_route": "f"},
     {"from_route": "/Form/<path:doctype>", "to_route": "Form"},
     {"from_route": "/FORMS/<path:doctype>", "to_route": "FORMS"},
     {"from_route": "/forms/<path:doctype>", "to_route": "forms"},
-    {"from_route": "/login", "to_route": "login"}
+    {"from_route": "/login", "to_route": "login"},
+    {"from_route": "/gene_detail/<name>", "to_route": "gene_detail"},
 ]
 
 extend_bootinfo = [
@@ -79,6 +82,10 @@ fixtures = [
     {"dt": "Report", "filters": [["module", "in", ["Theme"]]]},
     {"dt": "DocType", "filters": [["module", "in", ["Theme"]]]}
 ]
+
+override_template_paths = {
+    "frappe/templates/includes/navbar/navbar.html": "custom_app/templates/includes/navbar/navbar.html"
+}
 
 
 # Svg Icons

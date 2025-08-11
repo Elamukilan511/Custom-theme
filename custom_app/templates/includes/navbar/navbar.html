@@ -1,0 +1,524 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<nav class="navbar navbar-light navbar-expand-lg" style="background-color: #8d33c3;">
+  <div class="container d-flex flex-wrap align-items-center">
+    <a class="navbar-brand" href="{{ url_prefix }}{{ home_page or "/" }}">
+			{%- if brand_html -%}
+				{{ brand_html }}
+			{%- elif banner_image -%}
+				<img src='{{ banner_image }}'>
+			{%- else -%}
+				<span>{{ (frappe.get_hooks("brand_html") or [_("Home")])[0] }}</span>
+			{%- endif -%}
+		</a>
+    <!-- <a class="navbar-brand" href="/">
+      <div class="logo d-flex align-items-center">
+        <img alt="Logo" class="logo-img mr-2" src="/files/Medstat AI Logo.png" style="height: 40px;">
+        <div class="logo-text font-weight-bold text-white">MeD<span>Stat</span> AI</div>
+      </div>
+    </a> -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span>
+        <svg class="icon icon-lg">
+          <use href="#icon-menu"></use>
+        </svg>
+      </span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="mobile-header d-lg-none d-flex justify-content-between align-items-center p-2" style="background-color: #8d33c3; color: white;">
+        <button class="navbar-toggler close-btn" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Close navigation">
+          <span>
+            <svg class="icon icon-lg">
+              <use href="#icon-close"></use>
+            </svg>
+          </span>
+        </button>
+      </div>
+      <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
+        {% for item in frappe.get_doc("Website Settings").top_bar_items %}
+          {% if item.mega_menu %}
+            <li class="nav-item dropdown ms-megamnu" style="position: static;">
+              <a class="nav-link dropdown-toggle text-white" href="#" id="megaMenu-{{ item.label | lower }}"
+                data-megamenu="{{ item.mega_menu }}" aria-haspopup="true" aria-expanded="false">{{ item.label }}</a>
+              <div class="dropdown-menu ms-megamnu-menu p-4 d-none d-lg-block" aria-labelledby="megaMenu-{{ item.label | lower }}">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <ul class="list-unstyled" id="service-list-{{ item.label | lower }}"></ul>
+                    </div>
+                    <div class="col-md-3">
+                      <ul class="list-unstyled" id="subservice-list-{{ item.label | lower }}"></ul>
+                    </div>
+                    <div class="col-md-3">
+                      <ul class="list-unstyled" id="subsubservice-list-{{ item.label | lower }}"></ul>
+                    </div>
+                    <div class="col-md-3">
+                      <img id="promo-image-{{ item.label | lower }}" src="/files/bio_img.png" alt="Promo" class="img-fluid rounded shadow-sm">
+                      <p id="promo-text-{{ item.label | lower }}" class="text-muted small mt-2">Explore our advanced gene research tools.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="d-lg-none mobile-menu dropdown-menu" id="mobile-menu-{{ item.label | lower }}" aria-labelledby="megaMenu-{{ item.label | lower }}"></div>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{{ item.url }}">{{ item.label }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+        {% include "templates/includes/navbar/navbar_login.html" %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+/* Navbar Link Styling */
+.navbar-nav .nav-link {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 15px;
+  color: #ffffff;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+/* Mega Menu Dropdown (Dynamic) */
+.ms-megamnu-menu {
+  width: 100%;
+  background-color: #ffffff !important;
+  border: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 0;
+  padding: 20px !important;
+}
+
+/* Hover to Show Dropdown (Desktop) */
+@media (min-width: 992px) {
+  .ms-megamnu:hover .ms-megamnu-menu {
+    display: block !important;
+  }
+  .ms-megamnu-menu {
+    display: none !important;
+  }
+}
+/* Override styles for active dropdown item in web view */
+.ms-megamnu .dropdown-item.active {
+  background-color: #071a88 !important; /* Full-width blue background */
+  color: #fff !important; /* White text for contrast */
+  border-radius: 4px; /* Slight rounding for box */
+  padding: 8px 12px !important; /* Balanced padding */
+  margin: 2px 0; /* Slight margin for separation */
+  display: block; /* Ensure full-width box */
+  border: none !important; /* Remove any border */
+  border-bottom: none !important; /* Explicitly remove bottom border (purple line) */
+  text-decoration: none !important; /* Remove any underline */
+  outline: none !important; /* Remove any outline */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for box effect */
+}
+
+/* Ensure parent container doesn't add unwanted borders */
+.ms-megamnu .ms-megamnu-menu .dropdown-item {
+  border-bottom: none !important; /* Remove any inherited bottom border */
+}
+/* Click to Show Dropdown (Mobile) */
+@media (max-width: 991px) {
+  .ms-megamnu .mobile-menu {
+    display: none;
+  }
+  .ms-megamnu.show .mobile-menu {
+    display: block;
+  }
+}
+
+/* Column Layout for Mega Menu */
+.ms-megamnu-menu .row {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+}
+.ms-megamnu-menu .col-md-3 {
+  padding: 0 10px;
+  flex: 1;
+  min-width: 0;
+  max-width: 25%;
+  box-sizing: border-box;
+}
+
+/* Style for Mega Menu Items */
+.ms-megamnu-menu .list-unstyled {
+  padding-left: 0;
+}
+.ms-megamnu-menu .list-unstyled > li {
+  position: relative;
+  padding: 8px 0;
+  border-radius: 0;
+  background-color: transparent !important;
+}
+.ms-megamnu-menu .list-unstyled > li.has-children > a {
+  display: inline-flex;
+  align-items: center;
+}
+.ms-megamnu-menu .list-unstyled > li.has-children > a::after {
+  content: ">";
+  font-size: 12px;
+  color: black !important; /* Updated color */
+  font-weight: 500;
+  margin-left: 8px;
+  transition: color 0.3s ease;
+}
+
+.ms-megamnu-menu .list-unstyled > li.has-children > a {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+.ms-megamnu-menu .list-unstyled > li:hover {
+  background-color: transparent !important;
+}
+.ms-megamnu-menu .list-unstyled > li:hover a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+/*  bottom: -2px; */
+  width: 100%;
+  height: 2px;
+ /* background-color: #8d33c3 !important;  Updated color */
+}
+.ms-megamnu-menu .list-unstyled > li.active {
+  background-color: transparent !important;
+  font-weight: 700;
+}
+.ms-megamnu-menu .list-unstyled > li.active a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background-color: #8d33c3 !important; /* Updated color */
+}
+.ms-megamnu-menu .list-unstyled > li a {
+  color: #333333;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  display: block;
+  text-transform: uppercase;
+  position: relative;
+  transition: color 0.3s ease;
+  background-color: transparent !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  padding: 8px 12px !important;
+  white-space: nowrap !important;
+}
+
+/* Nested Submenu Styling */
+.ms-megamnu-menu .list-unstyled .nested-submenu {
+  padding-left: 15px;
+  display: block;
+  margin-top: 3px;
+}
+.ms-megamnu-menu .list-unstyled > li:hover .nested-submenu {
+  display: block;
+}
+.ms-megamnu-menu .list-unstyled .nested-submenu li {
+  padding: 4px 0;
+  background-color: transparent !important;
+}
+.ms-megamnu-menu .list-unstyled .nested-submenu li a {
+  color: #555555;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: none;
+  transition: color 0.3s ease;
+  background-color: transparent !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  white-space: normal !important;
+}
+.ms-megamnu-menu .list-unstyled .nested-submenu li:hover {
+  background-color: transparent !important;
+}
+.ms-megamnu-menu .list-unstyled .nested-submenu li:hover a {
+  color: #555555;
+  background-color: transparent !important;
+}
+
+/* Placeholder Text */
+.text-muted {
+  color: #6c757d !important;
+  font-size: 13px;
+  font-style: normal;
+  padding: 6px 0;
+  line-height: 1.5;
+}
+
+/* Promo Section */
+.ms-megamnu-menu .col-md-3:last-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 10px;
+  max-width: 25%;
+  box-sizing: border-box;
+}
+[id^="promo-image-"] {
+  max-width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+[id^="promo-text-"] {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #333333;
+  margin-bottom: 10px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+[id^="promo-text-"] a {
+  color: #8d33c3 !important; /* Updated color */
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  padding: 5px 0;
+  display: inline-block;
+}
+[id^="promo-text-"] a:hover {
+  color: #6a1a9b !important; /* Darker shade of #8d33c3 for hover */
+}
+[id^="promo-text-"] a::after {
+  content: " >";
+  font-size: 12px;
+  color: #8d33c3 !important; /* Updated color */
+}
+
+/* Mobile View Styling */
+@media (max-width: 991px) {
+  .container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .navbar-brand {
+    margin-left: 0;
+    order: 1;
+  }
+  .navbar-toggler {
+    order: 2;
+    border: none;
+    padding: 10px;
+  }
+  .navbar-collapse {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    left: auto;
+    height: 100vh;
+    width: 250px;
+    background-color: #8d33c3 !important; /* Updated color */
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease-in-out;
+    z-index: 1050;
+    padding: 0;
+    overflow-y: auto;
+  }
+  .navbar-collapse.show {
+    right: 0;
+    width: 100vw;
+  }
+  .navbar-nav {
+    flex-direction: column;
+    margin-left: 0 !important;
+  }
+  .navbar-nav .nav-item {
+    width: 100%;
+  }
+  .navbar-nav .nav-link {
+    padding: 15px 20px 15px 30px;
+    color: #ffffff !important;
+    font-size: 16px;
+    font-weight: 500;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .mobile-menu {
+    width: 100%;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    position: static;
+    padding: 0 !important;
+  }
+  .mobile-menu.show {
+    display: block !important;
+  }
+  .mobile-menu .list-unstyled li {
+    padding: 15px 40px 15px 50px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: transparent !important;
+  }
+  .mobile-menu .list-unstyled li.has-children::after {
+    content: ">";
+    font-size: 16px;
+    color: #ffffff;
+  }
+  .mobile-menu .back-heading {
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #8d33c3 !important; /* Updated color */
+    padding: 15px 20px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 16px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    min-height: 54px;
+  }
+  .mobile-menu .back-arrow {
+    font-size: 16px;
+    line-height: 1;
+  }
+  .mobile-menu .heading-text {
+    flex: 1;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .mobile-menu .list-unstyled[data-level] {
+    padding-left: 0;
+    background-color: #8d33c3 !important; /* Updated color */
+    display: none;
+  }
+  .mobile-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .close-btn svg {
+    fill: #ffffff !important;
+    width: 24px;
+    height: 24px;
+  }
+  .navbar-toggler svg {
+    fill: #ffffff !important;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Override Backgrounds */
+.ms-megamnu-menu .list-unstyled > li,
+.ms-megamnu-menu .list-unstyled > li:hover,
+.ms-megamnu-menu .list-unstyled > li.active,
+.ms-megamnu-menu .list-unstyled .nested-submenu li,
+.ms-megamnu-menu .list-unstyled .nested-submenu li:hover,
+.mobile-menu .list-unstyled li,
+.mobile-menu .list-unstyled li:hover {
+  background-color: transparent !important;
+}
+
+/* Global Toggler Styling */
+.navbar-toggler {
+  border: none;
+  padding: 10px;
+}
+
+.navbar-toggler:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.navbar-toggler svg {
+  fill: #ffffff !important;
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 991px) {
+    .breadcrumb-container {
+/*    padding: 10px 16px 6px; */
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    flex-wrap: wrap;
+    line-height: 1.4;
+    background-color: transparent;
+    word-break: break-word;
+  }
+
+  .breadcrumb-container .breadcrumb-item {
+    position: relative;
+    padding-right: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    font-weight: bold;
+  }
+
+  .breadcrumb-container .breadcrumb-item:not(:last-child)::after {
+    margin: 0 6px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 400;
+  }
+  
+  .breadcrumb {
+    padding-left: 0;
+    padding-right: 0;
+    font-size: larger;
+}
+
+  /* Hide arrow beside SERVICES only when open */
+  .ms-megamnu.show > a.dropdown-toggle::after {
+    content: none !important;
+    display: none !important;
+  }
+}
+
+@media (max-width: 991px) {
+  /* When mobile menu opens, hide the top-level SERVICES link */
+  .ms-megamnu.show > a.nav-link {
+    display: none !important;
+  }
+}
+@media (min-width: 992px) {
+  .breadcrumb-container {
+    display: none !important;
+  }
+}
+.ms-megamnu .mobile-menu {
+  display: none;
+}
+.ms-megamnu.show .mobile-menu {
+  display: block;
+}
+
+@media (min-width: 992px) {
+    .navbar-expand-lg .navbar-collapse {
+        display: flex !important
+;
+        flex-basis: auto;
+        margin-top: 8px;
+      /*  margin-bottom: 8px;*/
+    }
+}
+</style>

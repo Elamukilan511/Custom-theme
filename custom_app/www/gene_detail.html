@@ -1,0 +1,642 @@
+{% extends "templates/web.html" %}
+
+{% block title %}
+{{ _("Palmyra Palm Genome Browser") }}
+{% endblock %}
+
+{% block page_content %}
+<br><br><br>
+<div class="header" style="width: 100%; margin: 0; padding: 1rem; background: #8833c3; color: #FFFFFF; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+  <h1 style="font-family: Merriweather, serif; font-size: 1.75rem; font-weight: 700; margin: 0; padding: 0.5rem 0;">The Palmyra Palm Genome Browser</h1>
+  <h3 style="font-size: 0.9rem; font-weight: 400; margin: 0; padding: 0.25rem 0;">Borassus flabellifer</h3>
+</div>
+
+<div class="nav-container" style="position: sticky; top: 90px; z-index: 99; width: 100%; margin: 0; padding: 1rem 0; text-align: center; background: #FFFFFF; border-bottom: 1px solid #EDE9FE; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+  <div class="nav-tabs" style="display: flex; justify-content: center; gap: 2rem; padding: 0.5rem 0; background: #EDE9FE; border-radius: 6px; max-width: 1200px; margin: 0 auto; position: sticky; top: 90px;">
+    <div class="nav-tab active" data-section="taxonomy" style="color: #49505f; text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem;">Taxonomy</div>
+    <div class="nav-tab" data-section="sequence" style="color: #49505f; text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem;">Sequence Data</div>
+    <div class="nav-tab" data-section="functional" style="color: #49505f; text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem;">Functional Analysis</div>
+  </div>
+</div>
+
+<div class="content-wrapper" style="width: 100%; margin: 0; padding: 0; min-height: calc(100vh - 150px); overflow-y: auto; background: #F9F5FF;">
+  <div id="taxonomy" class="content active">
+    <h2 style="font-size: 1.2rem; font-weight: 600; margin: 0; padding: 0.5rem 0; color: #8833c3; text-transform: uppercase; text-align: left; margin-left: 2%;">Taxonomy</h2>
+    <div class="taxonomy-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+      <div class="card content-card" style="background: #F9F5FF; padding: 1rem; border-radius: 6px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+        <p style="margin: 0 0 1rem;">{{ doc.taxonomy_description }}</p>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; background: #FFFFFF; border-radius: 6px; overflow: hidden;">
+          <tr style="background-color: #4B0082;"><th style="padding: 0.75rem; color: #FFFFFF;">Classification</th><th style="padding: 0.75rem; color: #FFFFFF;">Name</th></tr>
+          {% for row in doc.taxonomy_detail %}
+            <tr style="background-color: #FFFFFF;"><td style="padding: 0.75rem; border: 1px solid #EDE9FE;">{{ row.classification }}</td><td style="padding: 0.75rem; border: 1px solid #EDE9FE;">{{ row.classification_name }}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+      <div class="card image-card" style="background: #FFFFFF; padding: 1rem; border-radius: 6px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+        <img src="https://th-i.thgim.com/public/news/international/xgvf4l/article28620848.ece/alternates/FREE_1200/thjc-borassus-flabellifer" alt="Palmyra Palm" style="width: 100%; max-width: 516px; height: auto; object-fit: cover; border-radius: 6px; transition: transform 0.3s ease;" />
+      </div>
+    </div>
+  </div>
+
+  <div id="sequence" class="content">
+    <h2 style="font-size: 1.2rem; font-weight: 600; margin: 0; padding: 0.5rem 0; color: #8833c3; text-transform: uppercase; margin-left: 0.5%;">Sequence Data</h2>
+    <div class="tabbed-box seq-tabbed-box active" style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+      <div class="tab-buttons">
+        <button class="tab-button seq-tab-button active" data-section="raw-reads">Raw Reads</button>
+        <button class="tab-button seq-tab-button" data-section="assembly">Assembly Data</button>
+        <button class="tab-button seq-tab-button" data-section="coding">Coding Sequences</button>
+        <button class="tab-button seq-tab-button" data-section="non-coding">Non-coding Sequences</button>
+      </div>
+      <div id="raw-reads" class="tab-content seq-tab-content active">
+        <h2 style="font-size: 1.2rem; font-weight: 600; margin: 0; padding: 0.5rem 0; color: #8833c3; text-transform: uppercase;">Raw Reads</h2>
+        <table style="border-collapse: separate; border-spacing: 0 0.5rem;">
+          <tr style="background-color: #800080; color: white;">
+            <th>Organism</th><th>Bases</th><th>Size</th><th>GC Content</th><th>Published</th>
+          </tr>
+          {% for row in doc.raw_reads_1 %}
+          <tr style="background-color: #EDE9FE;">
+            <td>{{ row.organism }}</td><td>{{ row.bases }}</td><td>{{ row.size }}</td><td>{{ row.gc_content }}</td><td>{{ row.published }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="background-color: #800080; color: white;">
+            <th>Platform</th><th>Strategy</th><th>Source</th><th>Layout</th>
+          </tr>
+          {% for row in doc.raw_reads_2 %}
+          <tr style="background-color: #EDE9FE;">
+            <td>{{ row.platform }}</td><td>{{ row.strategy }}</td><td>{{ row.source }} </td><td>{{ row.layout }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        <h2 style="font-size: 1.2rem; font-weight: 600; margin: 0; padding: 0.5rem 0; color: #8833c3; text-transform: uppercase;">Sequencing Data Information</h2>
+        <div style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 1rem; margin-top: 1.5rem; background: #F9F5FF; padding: 0.75rem; border-radius: 6px; align-items: center;">
+          
+          <label for="sraAccession" style="font-weight: 600;">SRA Accession:</label>
+          <input type="text" id="sraAccession" value="{{ doc.sra_accession }}" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #EDE9FE; border-radius: 4px;">
+          <button onclick="copyField(this, 'sraAccession')" style="padding: 0.4rem 0.6rem; border: none; background: #DDD6FE; border-radius: 4px; cursor: pointer;">
+            <i class="fas fa-copy"></i>
+          </button>
+
+          <label for="experiment" style="font-weight: 600;">Experiment:</label>
+          <input type="text" id="experiment" value="{{ doc.experiment }}" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #EDE9FE; border-radius: 4px;">
+          <button onclick="copyField(this, 'experiment')" style="padding: 0.4rem 0.6rem; border: none; background: #DDD6FE; border-radius: 4px; cursor: pointer;">
+            <i class="fas fa-copy"></i>
+          </button>
+
+          <label for="biosample" style="font-weight: 600;">Biosample:</label>
+          <input type="text" id="biosample" value="{{ doc.biosample }}" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #EDE9FE; border-radius: 4px;">
+          <button onclick="copyField(this, 'biosample')" style="padding: 0.4rem 0.6rem; border: none; background: #DDD6FE; border-radius: 4px; cursor: pointer;">
+            <i class="fas fa-copy"></i>
+          </button>
+
+        </div>
+        <div style="text-align:center; margin-top: 1.5rem;">
+          <button style="background:#8833c3; color:#fff; padding:0.75rem 1.5rem; border:none; border-radius:6px; font-size:1rem; font-weight:500; cursor:pointer;">Download Raw Reads (FASTQ)</button>
+        </div>
+      </div>
+      <div id="assembly" class="tab-content seq-tab-content">
+        <h2 style="font-size: 1.2rem; font-weight: 600; margin: 0; padding: 0.5rem 0; color: #8833c3; text-transform: uppercase;">Assembly Data</h2>
+        <p style="background-color: #EDE9FE; padding: 0.5rem; margin-bottom: 1rem;">For Complete Assembly Statistics and Sample Details, visit: <a href="https://www.ncbi.nlm.nih.gov/datasets" style="color: #8833c3; text-decoration: underline;">NCBI Datasets</a></p>
+        <div class="scrollable-section">
+          <table style="border-collapse: separate; border-spacing: 0 0.5rem; width: 100%;">
+            <tr style="background-color: #2E7D32; color: white;">
+              <th>Metric</th><th>Value</th><th>Metric</th><th>Value</th>
+            </tr>
+            <tr>
+              <td>Date of Release</td><td>Jun 17, 2025</td><td>Assembly type</td><td>haploid</td>
+            </tr>
+            <tr>
+              <td>Assembly level</td><td>scaffold</td><td>Genome size</td><td>2.4 Gb</td>
+            </tr>
+            <tr>
+              <td>Number of scaffolds</td><td>2,939,123</td><td>Scaffold N50</td><td>1.3 kb</td>
+            </tr>
+          </table>
+        </div>
+        <h2 style="font-size: 1.2rem; font-weight: 600; margin: 0; padding: 0.5rem 0; color: #8833c3; text-transform: uppercase;">Assembly Information</h2>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-top: 1.5rem; background: #F9F5FF; padding: 0.75rem; border-radius: 6px;">
+          <label for="ncbiAccession" style="font-weight: 600;">NCBI Accession:</label>
+          <input type="text" id="ncbiAccession" value="{{ doc.ncbi_accession }}" style="width: 100%; padding: 0.5rem; border: 1px solid #EDE9FE; border-radius: 4px;">
+        </div>
+        <div style="text-align:center; margin-top: 1.5rem;">
+          <button style="background:#8833c3; color:#fff; padding:0.75rem 1.5rem; border:none; border-radius:6px; font-size:1rem; font-weight:500; cursor:pointer;">Download Assembly Data (FASTA)</button>
+        </div>
+      </div>
+      <div id="coding" class="tab-content seq-tab-content">
+        <div style="background-color: #ffffff; padding: 1rem;">
+          <h2 style="color: #8833c3; margin: 0 0 5px 0; text-align: center;">Coding Sequences</h2>
+          <hr style="border-top: 2px solid #8833c3; margin: 5px 0;">
+          <button style="background-color:#8833c3; color: white; border: none; padding: 10px 10px; font-size: 14px; cursor: pointer; display: block; margin: 20px auto;">Download coding sequence (FASTA) ↓</button>
+          <p style="background-color:#EDE9FE; padding: 5px; margin: 5px 0; border-left: 4px solid #EDE9FE; color: #333; text-align: center;">For more information, visit: <a href="https://pubmed.ncbi.nlm.nih.gov" style="color: #8833c3; text-decoration: underline;">PubMed</a></p>
+        </div>
+      </div>
+      <div id="non-coding" class="tab-content seq-tab-content">
+        <div class="non-coding-design">
+          <h2>Whole RNA family Data</h2>
+          <button style="background-color:#8833c3; color: white; border: none; padding: 10px 10px; font-size: 14px; cursor: pointer; display: block; margin: 20px auto;">Download Whole RNA family Data ↓</button>
+          <p style="background-color:#EDE9FE; padding: 5px; margin: 5px 0; border-left: 4px solid #EDE9FE; color: #333; text-align: center;">For more information, visit: <a href="https://pubmed.ncbi.nlm.nih.gov" style="color: #8833c3; text-decoration: underline;">PubMed</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="functional" class="content">
+    <h2 style="font-size: 1.2rem; font-weight: 600; margin: 0; padding: 0.5rem 0; color: #8833c3; text-transform: uppercase; margin-left: 0.5%;">Functional Analysis</h2>
+    <div class="tabbed-box func-tabbed-box active" style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+      <div class="tab-buttons">
+        <button class="tab-button func-tab-button active" data-section="miRNA">miRNA</button>
+        <button class="tab-button func-tab-button" data-section="interactome">Interactome</button>
+        <button class="tab-button func-tab-button" data-section="signaling">Signaling Pathways</button>
+      </div>
+      <div id="miRNA" class="tab-content func-tab-content active">
+        <h2 style="color: #8833c3; text-align: center; border-bottom: 2px solid #8833c3; padding-bottom: 0.5rem;">miRNA Prediction Data</h2>
+        <div style="display: flex; justify-content: center; margin-top: 2rem; margin-bottom: 1.5rem;">
+          <button style="background: #FFFFFF; border: 2px solid #8833c3; color: #8833c3; padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">Download miRNA Data ↓</button>
+        </div>
+        <div style="background: #F3E8FF; border-left: 4px solid #8833c3; padding: 1rem 1.25rem; border-radius: 8px; font-size: 0.9rem; color: #8833c3; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">miRNA data was obtained through <strong>miRMachine</strong> pipeline, using the <a href="#" style="color: #8833c3; text-decoration: underline;">miRDatabase</a> as reference. For more information, visit: <a href="https://pubmed.ncbi.nlm.nih.gov" style="color: #8833c3; text-decoration: underline;">PubMed</a>.</div>
+      </div>
+      <div id="interactome" class="tab-content func-tab-content">
+        <h2 style="color: #8833c3; text-align: center; border-bottom: 2px solid #8833c3; padding-bottom: 0.5rem;">miRNA-mRNA Interactome Data</h2>
+        <div style="display: flex; justify-content: center; margin-top: 2rem; margin-bottom: 1.5rem;">
+          <button style="background: #FFFFFF; border: 2px solid #8833c3; color: #8833c3; padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">Download miRNA-mRNA Interactome Data ↓</button>
+        </div>
+        <div style="background: #F3E8FF; border-left: 4px solid #8833c3; padding: 1rem 1.25rem; border-radius: 8px; font-size: 0.9rem; color: #8833c3; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">For more information, visit: <a href="https://pubmed.ncbi.nlm.nih.gov" style="color: #8833c3; text-decoration: underline;">PubMed</a>.</div>
+      </div>
+      <div id="signaling" class="tab-content func-tab-content">
+        <h2 style="color: #8833c3; text-align: center; border-bottom: 2px solid #8833c3; padding-bottom: 0.5rem;">Biological Signaling Pathways</h2>
+        <div style="display: flex; justify-content: center; margin-top: 2rem; margin-bottom: 1.5rem;">
+          <button style="background: #FFFFFF; border: 2px solid #8833c3; color: #8833c3; padding: 0.75rem 1.5rem; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">Download the biological signaling pathways of Borassus flabellifer ↓</button>
+        </div>
+        <div style="background: #F3E8FF; border-left: 4px solid #8833c3; padding: 1rem 1.25rem; border-radius: 8px; font-size: 0.9rem; color: #8833c3; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">For more information, visit: <a href="https://pubmed.ncbi.nlm.nih.gov" style="color: #8833c3; text-decoration: underline;">PubMed</a>.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #F9F5FF;
+  color: #2A1A4D;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  background: #8833c3;
+  color: #FFFFFF;
+  text-align: center;
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.header h1 {
+  font-family: Merriweather, serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0.5rem 0;
+  color: white;
+}
+.header h3 {
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin: 0;
+  padding: 0.25rem 0;
+  color: white;
+}
+.nav-container {
+  position: sticky;
+  top: 90px;
+  z-index: 99;
+  width: 100%;
+  margin: 0;
+  padding: 1rem 0;
+  text-align: center;
+  background: #FFFFFF;
+  border-bottom: 1px solid #EDE9FE;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.nav-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 0.5rem 0;
+  background: #EDE9FE;
+  border-radius: 6px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: sticky;
+  top: 90px;
+  z-index: 99;
+}
+.nav-tab {
+  color: #6B7280;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.nav-tab.active {
+  color: #8833c3;
+}
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #8833c3;
+}
+.tabbed-box {
+  display: none;
+  background: #FFFFFF;
+  min-width: 200px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  z-index: 1;
+  padding: 0;
+  border: 1px solid #EDE9FE;
+  margin-top: 0.5rem;
+}
+.tabbed-box.active {
+  display: block;
+}
+.tab-buttons {
+  display: flex;
+  border-bottom: 1px solid #EDE9FE;
+}
+.tab-button {
+  background: #F9F5FF;
+  color: #2A1A4D;
+  padding: 0.5rem 1rem;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: center;
+  flex: 1;
+  transition: background 0.3s ease;
+}
+.tab-button:hover {
+  background: #EDE9FE;
+}
+.tab-button.active {
+  background: #FFFFFF;
+  color: #8833c3;
+  border-bottom: 2px solid #8833c3;
+}
+.tab-content {
+  display: none;
+  padding: 1rem;
+  background: #FFFFFF;
+  border-radius: 0 0 8px 8px;
+}
+.tab-content.active {
+  display: block;
+}
+.content-wrapper {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: calc(100vh - 150px);
+  overflow-y: auto;
+  flex: 1;
+}
+.content {
+  display: none;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.content.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+.taxonomy-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.card {
+  background: #FFFFFF;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+.content-card {
+  background: #F9F5FF;
+}
+.image-card img {
+  width: 100%;
+  max-width: 516px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 6px;
+  transition: transform 0.3s ease;
+}
+.image-card img:hover {
+  transform: scale(1.02);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  background: #FFFFFF;
+  border-radius: 6px;
+  overflow: hidden;
+}
+th, td {
+  padding: 0.75rem;
+  border: 1px solid #EDE9FE;
+  text-align: left;
+  font-size: 0.9rem;
+}
+th {
+  background: #8833c3;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+.non-coding-design {
+  background: #fff;
+  border-radius: 5px;
+  text-align: center;
+  margin-top: 20px;
+}
+.non-coding-design h2 {
+  color: #8833c3;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #8833c3;
+  padding-bottom: 10px;
+}
+.non-coding-design button {
+  background: #8833c3;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.non-coding-design button:hover {
+  background: #6B21A8;
+}
+.non-coding-design p {
+  color: #333;
+  margin-top: 20px;
+}
+.non-coding-design a {
+  color: #8833c3;
+  text-decoration: none;
+}
+.non-coding-design a:hover {
+  text-decoration: underline;
+}
+.progress-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: #8833c3;
+  z-index: 200;
+  transition: width 0.3s ease;
+}
+.scrollable-section {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .header {
+    padding: 0.5rem;
+  }
+  .header h1 {
+    font-size: 1.5rem;
+    padding: 0.25rem 0;
+  }
+  .header h3 {
+    font-size: 0.8rem;
+  }
+  .nav-container {
+    top: 70px;
+    padding: 0.5rem 0;
+  }
+  .nav-tabs {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    margin: 0 0.5rem;
+    font-size: 0.9rem;
+  }
+  .nav-tab {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+    text-align: center;
+  }
+  .taxonomy-section {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+  .image-card img {
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+  }
+  .content-wrapper {
+    min-height: calc(100vh - 120px);
+  }
+  .tab-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .tab-button {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+    width: 100%;
+  }
+  table {
+    font-size: 0.85rem;
+  }
+  th, td {
+    padding: 0.5rem;
+  }
+  .scrollable-section {
+    max-height: 200px;
+  }
+  .content {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: 1rem;
+  }
+  button {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+  input {
+    font-size: 0.85rem;
+    padding: 0.4rem;
+    width: 100%;
+  }
+  .non-coding-design {
+    padding: 0.5rem;
+  }
+  .non-coding-design h2 {
+    font-size: 1rem;
+  }
+  p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 1.25rem;
+  }
+  .header h3 {
+    font-size: 0.75rem;
+  }
+  .nav-container {
+    top: 60px;
+  }
+  .nav-tab {
+    font-size: 0.8rem;
+    padding: 0.4rem;
+  }
+  .tab-button {
+    font-size: 0.8rem;
+  }
+  table {
+    font-size: 0.8rem;
+  }
+  th, td {
+    padding: 0.4rem;
+  }
+  .content {
+    padding: 0.4rem;
+  }
+  h2 {
+    font-size: 0.9rem;
+  }
+  button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const tabs = document.querySelectorAll('.nav-tab');
+  const contents = document.querySelectorAll('.content');
+  const seqTabButtons = document.querySelectorAll('.seq-tab-button');
+  const seqTabContents = document.querySelectorAll('.seq-tab-content');
+  const funcTabButtons = document.querySelectorAll('.func-tab-button');
+  const funcTabContents = document.querySelectorAll('.func-tab-content');
+  const seqTabbedBox = document.querySelector('.seq-tabbed-box');
+  const funcTabbedBox = document.querySelector('.func-tabbed-box');
+  const progressBar = document.createElement('div');
+  progressBar.className = 'progress-indicator';
+  document.body.appendChild(progressBar);
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function (e) {
+      e.preventDefault();
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      const targetSection = document.getElementById(this.dataset.section);
+      targetSection.classList.add('active');
+      if (this.dataset.section === 'sequence') {
+        seqTabbedBox.classList.add('active');
+        seqTabButtons[0].click();
+      } else if (this.dataset.section === 'functional') {
+        funcTabbedBox.classList.add('active');
+        funcTabButtons[0].click();
+      } else {
+        seqTabbedBox.classList.remove('active');
+        funcTabbedBox.classList.remove('active');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  seqTabButtons.forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+      seqTabButtons.forEach(b => b.classList.remove('active'));
+      seqTabContents.forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      const targetSection = document.getElementById(this.dataset.section);
+      targetSection.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  funcTabButtons.forEach(button => {
+    button.addEventListener('click', function (e) {
+      e.preventDefault();
+      funcTabButtons.forEach(b => b.classList.remove('active'));
+      funcTabContents.forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      const targetSection = document.getElementById(this.dataset.section);
+      targetSection.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = (scrollTop / docHeight) * 100;
+    progressBar.style.width = scrollPercent + '%';
+  });
+
+  tabs[0].click();
+});
+
+  function copyField(button, inputId) {
+    const value = document.getElementById(inputId).value;
+    const icon = button.querySelector('i');
+
+      frappe.utils.copy_to_clipboard(value);
+
+    // Change icon to check and revert
+    if (icon) {
+      icon.classList.remove('fa-copy');
+      icon.classList.add('fa-check');
+      setTimeout(() => {
+        icon.classList.remove('fa-check');
+        icon.classList.add('fa-copy');
+      }, 1500);
+    }
+  }
+</script>
+{% endblock %}
